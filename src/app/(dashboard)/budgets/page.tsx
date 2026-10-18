@@ -15,18 +15,18 @@ export default function BudgetsPage() {
   const [utilizations, setUtilizations] = useState<BudgetUtilization[]>([]);
   const [periodMonth, setPeriodMonth] = useState("2026-10");
 
-  const loadBudgets = async () => {
+  const loadBudgets = React.useCallback(async () => {
     try {
       const utils = await dataService.getBudgetUtilization(periodMonth);
       setUtilizations(utils);
     } catch (err) {
       console.error("Error loading budgets:", err);
     }
-  };
+  }, [periodMonth]);
 
   useEffect(() => {
     loadBudgets();
-  }, [periodMonth]);
+  }, [loadBudgets]);
 
   return (
     <div className="space-y-6">
@@ -86,21 +86,21 @@ export default function BudgetsPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-2 p-3 bg-slateSurface-50 rounded-lg text-xs">
+              <div className="grid grid-cols-3 gap-2 p-3 bg-slateSurface-100 rounded-lg text-xs">
                 <div>
-                  <span className="text-brand-700/60 block text-[11px]">Spent to Date</span>
+                  <span className="text-brand-700 block text-[11px] font-medium">Spent to Date</span>
                   <span className="font-mono font-bold text-brand-900">
                     <CurrencyAmount amount={b.spentAmount} />
                   </span>
                 </div>
                 <div>
-                  <span className="text-brand-700/60 block text-[11px]">Limit</span>
+                  <span className="text-brand-700 block text-[11px] font-medium">Limit</span>
                   <span className="font-mono font-semibold text-brand-900">
                     <CurrencyAmount amount={b.amountLimit} />
                   </span>
                 </div>
                 <div>
-                  <span className="text-brand-700/60 block text-[11px]">Remaining</span>
+                  <span className="text-brand-700 block text-[11px] font-medium">Remaining</span>
                   <span className={`font-mono font-bold ${b.remainingAmount < 0 ? "text-risk-600" : "text-forest"}`}>
                     <CurrencyAmount amount={b.remainingAmount} colored />
                   </span>

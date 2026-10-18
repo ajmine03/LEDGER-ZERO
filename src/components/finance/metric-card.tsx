@@ -74,10 +74,10 @@ export function MetricCard({
               </button>
 
               {showTooltip && (
-                <div className="absolute left-0 top-6 z-30 w-64 p-3 bg-brand-950 text-white text-xs rounded-xl shadow-dropdown leading-relaxed pointer-events-none animate-in fade-in duration-100">
-                  <p className="font-semibold text-lime-accent mb-1">{title} Definition</p>
-                  <p className="mb-2 text-slateSurface-200">{definition}</p>
-                  <div className="pt-2 border-t border-brand-800 text-[11px] text-slateSurface-300">
+                <div className="absolute left-0 top-6 z-30 w-64 p-3 bg-slate-900 dark:bg-slate-950 text-white text-xs rounded-xl border border-slate-700 shadow-xl leading-relaxed pointer-events-none animate-in fade-in duration-100">
+                  <p className="font-semibold text-emerald-400 mb-1">{title} Definition</p>
+                  <p className="mb-2 text-slate-200">{definition}</p>
+                  <div className="pt-2 border-t border-slate-700 text-[11px] text-slate-400">
                     <span className="font-medium text-white">Period:</span> {period}
                     <br />
                     <span className="font-medium text-white">Source:</span> {source}

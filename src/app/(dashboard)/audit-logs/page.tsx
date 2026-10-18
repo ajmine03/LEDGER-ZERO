@@ -100,7 +100,7 @@ export default function AuditLogsPage() {
               filtered.map((log) => (
                 <div
                   key={log.id}
-                  className="p-4 bg-white border border-slateSurface-200 rounded-xl hover:border-brand-300 transition-colors flex items-start gap-4 text-xs"
+                  className="p-4 bg-surfaceSubtle border border-slateSurface-200 rounded-xl hover:border-brand-300 transition-colors flex items-start gap-4 text-xs"
                 >
                   <div className="p-2 rounded-xl bg-slateSurface-100 shrink-0 mt-0.5">
                     {log.actorType === "agent" ? (

@@ -36,7 +36,8 @@ import { formatShortDate } from "@/lib/dates";
 import { formatMinorUnits } from "@/lib/money";
 
 export default function CashFlowSimulatorPage() {
-  const { countryConfig, activeCurrency, permissions } = useApp();
+  const { countryConfig, activeCurrency, permissions, resolvedTheme } = useApp();
+  const isDark = resolvedTheme === "dark";
 
   const [forecastDays, setForecastDays] = useState<number>(30);
   const [simulationResult, setSimulationResult] = useState<ScenarioSimulationResult | null>(null);
@@ -65,7 +66,7 @@ export default function CashFlowSimulatorPage() {
     },
   ]);
 
-  const runSimulation = async () => {
+  const runSimulation = React.useCallback(async () => {
     setIsLoading(true);
     try {
       const res = await dataService.simulateScenario(assumptions, forecastDays);
@@ -75,11 +76,11 @@ export default function CashFlowSimulatorPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [assumptions, forecastDays]);
 
   useEffect(() => {
     runSimulation();
-  }, [assumptions, forecastDays]);
+  }, [runSimulation]);
 
   const handleToggleAssumption = (id: string) => {
     setAssumptions((prev) => prev.filter((a) => a.id !== id));
@@ -223,19 +224,19 @@ export default function CashFlowSimulatorPage() {
 
           <div className="flex items-center gap-2">
             <span className="text-xs text-brand-700/70">Window:</span>
-            <div className="flex items-center gap-1 bg-slateSurface-100 p-1 rounded-lg">
+            <div className="flex items-center gap-1 bg-slateSurface-100 p-1 rounded-lg border border-slateSurface-200">
               <button
                 onClick={() => setForecastDays(14)}
-                className={`px-2.5 py-1 text-xs font-semibold rounded-md ${
-                  forecastDays === 14 ? "bg-white text-forest shadow-xs" : "text-brand-700/70"
+                className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors ${
+                  forecastDays === 14 ? "bg-surface text-forest font-bold shadow-xs border border-slateSurface-200" : "text-brand-700 hover:text-brand-900"
                 }`}
               >
                 14 Days
               </button>
               <button
                 onClick={() => setForecastDays(30)}
-                className={`px-2.5 py-1 text-xs font-semibold rounded-md ${
-                  forecastDays === 30 ? "bg-white text-forest shadow-xs" : "text-brand-700/70"
+                className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors ${
+                  forecastDays === 30 ? "bg-surface text-forest font-bold shadow-xs border border-slateSurface-200" : "text-brand-700 hover:text-brand-900"
                 }`}
               >
                 30 Days
@@ -250,16 +251,16 @@ export default function CashFlowSimulatorPage() {
               <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
                 <defs>
                   <linearGradient id="modGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#14532D" stopOpacity={0.25} />
-                    <stop offset="95%" stopColor="#14532D" stopOpacity={0.0} />
+                    <stop offset="5%" stopColor={isDark ? "#4ADE80" : "#14532D"} stopOpacity={0.25} />
+                    <stop offset="95%" stopColor={isDark ? "#4ADE80" : "#14532D"} stopOpacity={0.0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8E4" />
-                <XAxis dataKey="formattedDate" tickLine={false} axisLine={false} tick={{ fill: "#5d7365", fontSize: 11 }} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={isDark ? "#22382B" : "#E2E8E4"} />
+                <XAxis dataKey="formattedDate" tickLine={false} axisLine={false} tick={{ fill: isDark ? "#8CA898" : "#5d7365", fontSize: 11 }} />
                 <YAxis
                   tickLine={false}
                   axisLine={false}
-                  tick={{ fill: "#5d7365", fontSize: 11 }}
+                  tick={{ fill: isDark ? "#8CA898" : "#5d7365", fontSize: 11 }}
                   tickFormatter={(val) => `$${val.toLocaleString()}`}
                 />
                 <Tooltip
@@ -267,17 +268,17 @@ export default function CashFlowSimulatorPage() {
                     if (active && payload && payload.length) {
                       const data = payload[0].payload;
                       return (
-                        <div className="bg-brand-950 text-white p-3 rounded-xl shadow-dropdown text-xs space-y-1.5">
-                          <p className="font-semibold text-slateSurface-200">{data.date}</p>
+                        <div className="bg-slate-900 dark:bg-slate-950 text-white p-3 rounded-xl border border-slate-700 shadow-xl text-xs space-y-1.5">
+                          <p className="font-semibold text-slate-300">{data.date}</p>
                           <div className="flex items-center justify-between gap-4">
-                            <span className="text-lime-accent font-semibold">Modified Scenario:</span>
-                            <span className="font-mono font-bold">
+                            <span className="text-emerald-400 font-semibold">Modified Scenario:</span>
+                            <span className="font-mono font-bold text-white">
                               {formatMinorUnits(data.modifiedMinor, activeCurrency, countryConfig.locale)}
                             </span>
                           </div>
-                          <div className="flex items-center justify-between gap-4 text-slateSurface-400">
+                          <div className="flex items-center justify-between gap-4 text-slate-400">
                             <span>Baseline (Unchanged):</span>
-                            <span className="font-mono">
+                            <span className="font-mono text-slate-200">
                               {formatMinorUnits(data.baselineMinor, activeCurrency, countryConfig.locale)}
                             </span>
                           </div>
@@ -313,12 +314,12 @@ export default function CashFlowSimulatorPage() {
 
           {/* Key Simulation KPI Summary */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6 pt-4 border-t border-slateSurface-100 text-xs">
-            <div className="p-3 bg-slateSurface-50 rounded-lg">
-              <span className="text-brand-700/60 block">Baseline Min Cash</span>
+            <div className="p-3 bg-slateSurface-100 rounded-lg">
+              <span className="text-brand-700 block font-medium">Baseline Min Cash</span>
               <span className="font-mono font-bold text-sm text-risk-600">
                 <CurrencyAmount amount={simulationResult?.baselineForecast.minimumCash || 0} colored />
               </span>
-              <span className="text-[10px] text-brand-700/50 block mt-0.5">
+              <span className="text-[10px] text-brand-700 block mt-0.5">
                 On {simulationResult?.baselineForecast.minimumCashDate}
               </span>
             </div>
@@ -328,27 +329,27 @@ export default function CashFlowSimulatorPage() {
               <span className="font-mono font-bold text-sm text-forest-action">
                 <CurrencyAmount amount={simulationResult?.modifiedForecast.minimumCash || 0} colored />
               </span>
-              <span className="text-[10px] text-brand-700/60 block mt-0.5">
+              <span className="text-[10px] text-brand-700 block mt-0.5 font-medium">
                 Deficit averted: {simulationResult?.modifiedForecast.firstShortfallDate || "None"}
               </span>
             </div>
 
-            <div className="p-3 bg-slateSurface-50 rounded-lg">
-              <span className="text-brand-700/60 block">Net Liquidity Delta</span>
+            <div className="p-3 bg-slateSurface-100 rounded-lg">
+              <span className="text-brand-700 block font-medium">Net Liquidity Delta</span>
               <span className="font-mono font-bold text-sm text-success-700">
                 +<CurrencyAmount amount={simulationResult?.minimumCashDifference || 0} />
               </span>
-              <span className="text-[10px] text-brand-700/50 block mt-0.5">
+              <span className="text-[10px] text-brand-700 block mt-0.5">
                 Buffer generated
               </span>
             </div>
 
-            <div className="p-3 bg-slateSurface-50 rounded-lg">
-              <span className="text-brand-700/60 block">Impacted Invoices</span>
+            <div className="p-3 bg-slateSurface-100 rounded-lg">
+              <span className="text-brand-700 block font-medium">Impacted Invoices</span>
               <span className="font-mono font-bold text-sm text-brand-900">
                 {simulationResult?.impactedRecordIds.length || 0} Records
               </span>
-              <span className="text-[10px] text-brand-700/50 block mt-0.5">
+              <span className="text-[10px] text-brand-700 block mt-0.5">
                 No database records modified
               </span>
             </div>
@@ -372,7 +373,7 @@ export default function CashFlowSimulatorPage() {
             {assumptions.map((asm) => (
               <div
                 key={asm.id}
-                className="flex items-center justify-between p-3.5 bg-white border border-slateSurface-200 rounded-xl hover:border-brand-300 transition-colors text-xs"
+                className="flex items-center justify-between p-3.5 bg-surfaceSubtle border border-slateSurface-200 rounded-xl hover:border-brand-300 transition-colors text-xs"
               >
                 <div className="flex items-start gap-3">
                   <div className="p-1.5 bg-brand-50 text-forest-action rounded-lg font-bold mt-0.5">
@@ -380,7 +381,7 @@ export default function CashFlowSimulatorPage() {
                   </div>
                   <div>
                     <h5 className="font-semibold text-brand-900">{asm.label}</h5>
-                    <p className="text-[11px] text-brand-700/60 mt-0.5">
+                    <p className="text-[11px] text-brand-700 mt-0.5">
                       Type: <code>{asm.type}</code> • Shift: {asm.shiftDays || 0} days
                       {asm.percentageDelta ? ` • Incentive: ${asm.percentageDelta}%` : ""}
                     </p>

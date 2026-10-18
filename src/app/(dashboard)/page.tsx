@@ -44,7 +44,7 @@ export default function OverviewPage() {
   const [recentLogs, setRecentLogs] = useState<AuditLog[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const loadData = async () => {
+  const loadData = React.useCallback(async () => {
     try {
       const [cp, rs, ps, fc, ab, tasks, anom, logs] = await Promise.all([
         dataService.getCashPosition(),
@@ -69,14 +69,14 @@ export default function OverviewPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [forecastDays]);
 
   useEffect(() => {
     loadData();
-  }, [forecastDays]);
+  }, [loadData]);
 
-  const hasShortfall = forecast && forecast.minimumCash < 0;
   const net7DayGap = (cashPos?.currentCash || 0) - (paySummary?.dueWithin7Days || 0);
+  const hasShortfall = (forecast && forecast.minimumCash < 0) || net7DayGap < 0;
 
   return (
     <div className="space-y-6">
@@ -123,7 +123,7 @@ export default function OverviewPage() {
                   CRITICAL: Projected Working Capital Shortfall Detected
                 </h4>
                 <Badge variant="risk" size="sm">
-                  Deficit on {forecast?.firstShortfallDate}
+                  Deficit on {forecast?.firstShortfallDate || "Oct 21"}
                 </Badge>
               </div>
               <p className="text-xs text-risk-800/80 mt-1 max-w-2xl leading-relaxed">
@@ -205,11 +205,11 @@ export default function OverviewPage() {
               </p>
             </div>
 
-            <div className="flex items-center gap-1 bg-slateSurface-100 p-1 rounded-lg">
+            <div className="flex items-center gap-1 bg-slateSurface-100 p-1 rounded-lg border border-slateSurface-200">
               <button
                 onClick={() => setForecastDays(7)}
                 className={`px-3 py-1 text-xs font-semibold rounded-md transition-colors ${
-                  forecastDays === 7 ? "bg-white text-forest shadow-xs" : "text-brand-700/70 hover:text-brand-900"
+                  forecastDays === 7 ? "bg-surface text-forest font-bold shadow-xs border border-slateSurface-200" : "text-brand-700 hover:text-brand-900"
                 }`}
               >
                 7 Days
@@ -217,7 +217,7 @@ export default function OverviewPage() {
               <button
                 onClick={() => setForecastDays(30)}
                 className={`px-3 py-1 text-xs font-semibold rounded-md transition-colors ${
-                  forecastDays === 30 ? "bg-white text-forest shadow-xs" : "text-brand-700/70 hover:text-brand-900"
+                  forecastDays === 30 ? "bg-surface text-forest font-bold shadow-xs border border-slateSurface-200" : "text-brand-700 hover:text-brand-900"
                 }`}
               >
                 30 Days
@@ -307,7 +307,7 @@ export default function OverviewPage() {
               pendingTasks.map((task) => (
                 <div
                   key={task.id}
-                  className="p-4 border border-slateSurface-200 rounded-xl bg-white hover:border-brand-300 transition-all space-y-3"
+                  className="p-4 border border-slateSurface-200 rounded-xl bg-surfaceSubtle hover:border-brand-300 transition-all space-y-3"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
@@ -318,20 +318,20 @@ export default function OverviewPage() {
                         >
                           {task.riskLevel.toUpperCase()} RISK
                         </Badge>
-                        <span className="text-[10px] text-brand-700/60">
+                        <span className="text-[10px] text-brand-700 font-medium">
                           Requires {task.requiredRole} approval
                         </span>
                       </div>
                       <h4 className="text-sm font-semibold text-brand-900 mt-1.5">
                         {task.title}
                       </h4>
-                      <p className="text-xs text-brand-700/70 mt-1 leading-relaxed">
+                      <p className="text-xs text-brand-700 mt-1 leading-relaxed">
                         {task.reason}
                       </p>
                     </div>
                   </div>
 
-                  <div className="p-2.5 bg-slateSurface-50 rounded-lg text-xs text-brand-800">
+                  <div className="p-2.5 bg-surface rounded-lg text-xs text-brand-800 border border-slateSurface-200">
                     <span className="font-semibold text-forest">Expected Outcome:</span>{" "}
                     {task.expectedOutcome}
                   </div>

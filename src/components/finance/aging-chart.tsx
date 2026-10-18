@@ -16,7 +16,8 @@ import { formatMinorUnits } from "@/lib/money";
 import { useApp } from "@/context/app-context";
 
 export function AgingChart({ buckets, height = 240 }: { buckets: AgingBucket[]; height?: number }) {
-  const { countryConfig, activeCurrency } = useApp();
+  const { countryConfig, activeCurrency, resolvedTheme } = useApp();
+  const isDark = resolvedTheme === "dark";
   const factor = Math.pow(10, countryConfig.minorUnitDecimals);
 
   const data = buckets.map((b) => ({
@@ -29,34 +30,37 @@ export function AgingChart({ buckets, height = 240 }: { buckets: AgingBucket[]; 
   const getBarColor = (label: string) => {
     switch (label) {
       case "Current":
-        return "#183B2A"; // Brand green
+        return isDark ? "#4ADE80" : "#183B2A";
       case "1-30 Days":
-        return "#F59E0B"; // Amber
+        return "#F59E0B";
       case "31-60 Days":
-        return "#EA580C"; // Orange
+        return "#EA580C";
       case "61-90 Days":
       case "90+ Days":
-        return "#DC2626"; // Red
+        return "#DC2626";
       default:
-        return "#183B2A";
+        return isDark ? "#4ADE80" : "#183B2A";
     }
   };
+
+  const gridColor = isDark ? "#22382B" : "#E2E8E4";
+  const textColor = isDark ? "#8CA898" : "#5d7365";
 
   return (
     <div style={{ width: "100%", height }}>
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8E4" />
+          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={gridColor} />
           <XAxis
             dataKey="label"
             tickLine={false}
             axisLine={false}
-            tick={{ fill: "#5d7365", fontSize: 11 }}
+            tick={{ fill: textColor, fontSize: 11 }}
           />
           <YAxis
             tickLine={false}
             axisLine={false}
-            tick={{ fill: "#5d7365", fontSize: 11 }}
+            tick={{ fill: textColor, fontSize: 11 }}
             tickFormatter={(val) => `$${val.toLocaleString()}`}
           />
           <Tooltip
@@ -64,12 +68,12 @@ export function AgingChart({ buckets, height = 240 }: { buckets: AgingBucket[]; 
               if (active && payload && payload.length) {
                 const item = payload[0].payload;
                 return (
-                  <div className="bg-brand-950 text-white p-2.5 rounded-xl shadow-dropdown text-xs">
-                    <p className="font-semibold text-slateSurface-200">{item.label}</p>
-                    <p className="text-lime-accent font-mono font-bold mt-0.5">
+                  <div className="bg-slate-900 dark:bg-slate-950 border border-slate-700 text-white p-2.5 rounded-xl shadow-xl text-xs space-y-1">
+                    <p className="font-semibold text-slate-300">{item.label}</p>
+                    <p className="text-emerald-400 font-mono font-bold">
                       {formatMinorUnits(item.amount, activeCurrency, countryConfig.locale)}
                     </p>
-                    <p className="text-slateSurface-400 text-[11px] mt-1">
+                    <p className="text-slate-400 text-[11px]">
                       {item.count} invoice{item.count === 1 ? "" : "s"}
                     </p>
                   </div>

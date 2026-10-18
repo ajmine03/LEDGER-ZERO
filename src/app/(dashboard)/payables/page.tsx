@@ -142,11 +142,11 @@ export default function PayablesPage() {
                   return (
                     <div
                       key={inv.id}
-                      className="flex items-center justify-between p-2.5 bg-white border border-slateSurface-200 rounded-lg"
+                      className="flex items-center justify-between p-2.5 bg-surfaceSubtle border border-slateSurface-200 rounded-lg"
                     >
                       <div>
                         <div className="font-semibold text-brand-900">{inv.invoiceNumber}</div>
-                        <div className="text-[11px] text-brand-700/60">
+                        <div className="text-[11px] text-brand-700">
                           Due: <strong>{formatShortDate(inv.dueDate)}</strong>
                         </div>
                       </div>

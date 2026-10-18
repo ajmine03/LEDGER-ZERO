@@ -4,10 +4,66 @@
 
 :root {
   --background: #F7F8F5;
-  --foreground: #183B2A;
+  --foreground: #12281D;
   --surface: #FFFFFF;
+  --surface-subtle: #F1F4F2;
+  --border: #E2E8E4;
+  --border-subtle: #EDF1EE;
   --forest-action: #14532D;
+  --forest-action-hover: #166534;
   --lime-accent: #D9F99D;
+  --lime-accent-hover: #BEF264;
+  --text-muted: #375041;
+  --text-dim: #526B5C;
+  --chart-grid: #E2E8E4;
+  --chart-text: #4B6354;
+  --chart-line: #14532D;
+  --chart-fill-start: rgba(20, 83, 45, 0.25);
+  --chart-fill-end: rgba(20, 83, 45, 0.0);
+  --chart-baseline: #94A3B8;
+  --card-shadow: 0 1px 3px 0 rgba(24, 59, 42, 0.05), 0 1px 2px -1px rgba(24, 59, 42, 0.05);
+  --dropdown-shadow: 0 10px 15px -3px rgba(24, 59, 42, 0.1), 0 4px 6px -4px rgba(24, 59, 42, 0.1);
+  --risk-bg: #FEF2F2;
+  --risk-border: #FCA5A5;
+  --risk-text: #991B1B;
+  --warning-bg: #FFFBEB;
+  --warning-border: #FCD34D;
+  --warning-text: #92400E;
+  --success-bg: #ECFDF5;
+  --success-border: #6EE7B7;
+  --success-text: #065F46;
+}
+
+.dark {
+  --background: #0B130E;
+  --foreground: #F2F8F4;
+  --surface: #121F17;
+  --surface-subtle: #18281F;
+  --border: #22382B;
+  --border-subtle: #1A2E22;
+  --forest-action: #22C55E;
+  --forest-action-hover: #16A34A;
+  --lime-accent: #BEF264;
+  --lime-accent-hover: #D9F99D;
+  --text-muted: #CBDAD0;
+  --text-dim: #8FA899;
+  --chart-grid: #1F3327;
+  --chart-text: #8CA898;
+  --chart-line: #4ADE80;
+  --chart-fill-start: rgba(74, 222, 128, 0.25);
+  --chart-fill-end: rgba(74, 222, 128, 0.0);
+  --chart-baseline: #64748B;
+  --card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px -1px rgba(0, 0, 0, 0.3);
+  --dropdown-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.5);
+  --risk-bg: #2A1215;
+  --risk-border: #7F1D1D;
+  --risk-text: #FCA5A5;
+  --warning-bg: #2B1D0E;
+  --warning-border: #78350F;
+  --warning-text: #FDE68A;
+  --success-bg: #0E291B;
+  --success-border: #065F46;
+  --success-text: #A7F3D0;
 }
 
 body {
@@ -16,6 +72,7 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 /* Ensure tabular numerals for financial data across the app */
@@ -24,21 +81,21 @@ body {
   font-feature-settings: "tnum";
 }
 
-/* Custom scrollbars for data tables and logs */
+/* Custom scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #F1F4F2;
+  background: var(--surface-subtle);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #CAD3CD;
+  background: var(--border);
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #9BB0A0;
+  background: var(--text-dim);
 }

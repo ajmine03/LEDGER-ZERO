@@ -98,7 +98,7 @@ export default function TeamPage() {
             </p>
           </div>
 
-          <div className="flex items-center gap-1.5 bg-white p-1 rounded-lg border border-slateSurface-200 shrink-0">
+          <div className="flex items-center gap-1.5 bg-surfaceSubtle p-1 rounded-lg border border-slateSurface-200 shrink-0">
             {roles.map((r) => (
               <button
                 key={r}

@@ -1,64 +1,65 @@
 "use client";
 
-import React, { useState, useEffect, Suspense } from "react";
+import React, { useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useApp } from "@/context/app-context";
-import { actionService, dataService } from "@/services";
-import { ActionTask, ActionStatus } from "@/domain/types";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { actionService } from "@/services";
+import { ActionTask } from "@/domain/types";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Modal } from "@/components/ui/modal";
 import { Tabs } from "@/components/ui/tabs";
 import {
-  Zap,
   CheckCircle2,
   XCircle,
-  Clock,
-  ShieldCheck,
-  AlertTriangle,
-  Play,
   Eye,
-  Ban,
-  Sparkles,
+  Play,
+  Calculator,
 } from "lucide-react";
-import { formatShortDate } from "@/lib/dates";
+import { formatMinorUnits } from "@/lib/money";
 
 function ActionCenterContent() {
   const searchParams = useSearchParams();
-  const { currentMember, currentRole, permissions } = useApp();
+  const { currentMember, currentRole, permissions, activeCurrency, countryConfig } = useApp();
 
   const [tasks, setTasks] = useState<ActionTask[]>([]);
   const [activeTab, setActiveTab] = useState<string>("all");
   const [selectedTask, setSelectedTask] = useState<ActionTask | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [editableDiscount, setEditableDiscount] = useState<number>(2.0);
 
-  const loadTasks = async () => {
+  const loadTasks = useCallback(async () => {
     try {
       const allTasks = await actionService.getActionTasks();
       setTasks(allTasks);
 
-      // Check query param for auto-opening
       const queryTaskId = searchParams.get("taskId");
       if (queryTaskId) {
         const found = allTasks.find((t) => t.id === queryTaskId);
         if (found) {
           setSelectedTask(found);
+          if (found.parameters?.discountPercent !== undefined) {
+            setEditableDiscount(found.parameters.discountPercent);
+          }
           setIsModalOpen(true);
         }
       }
     } catch (err) {
       console.error("Error loading action tasks:", err);
     }
-  };
+  }, [searchParams]);
 
   useEffect(() => {
     loadTasks();
-  }, []);
+  }, [loadTasks]);
 
   const handleOpenTask = (task: ActionTask) => {
     setSelectedTask(task);
+    if (task.parameters?.discountPercent !== undefined) {
+      setEditableDiscount(task.parameters.discountPercent);
+    }
     setIsModalOpen(true);
   };
 
@@ -66,11 +67,12 @@ function ActionCenterContent() {
     if (!selectedTask || isProcessing) return;
     setIsProcessing(true);
     try {
+      selectedTask.parameters.discountPercent = editableDiscount;
       const updated = await actionService.approveActionTask(
         selectedTask.id,
         currentMember?.id || "mem-1",
         currentMember?.name || "Active User",
-        "Authorized from Action Center interface"
+        `Authorized from Action Center with ${editableDiscount}% prompt-settlement assumption`
       );
       setSelectedTask(updated);
       await loadTasks();
@@ -146,6 +148,10 @@ function ActionCenterContent() {
     },
   ];
 
+  // Dynamic recomputed inflow for Apex invoice ($15k base)
+  const baseInvoiceMinor = 1500000;
+  const recomputedInflowMinor = baseInvoiceMinor - Math.round(baseInvoiceMinor * (editableDiscount / 100));
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -200,7 +206,7 @@ function ActionCenterContent() {
                       }
                       size="sm"
                     >
-                      {task.status.toUpperCase()}
+                      {task.status.toUpperCase()} (SIMULATED)
                     </Badge>
 
                     <Badge
@@ -210,13 +216,13 @@ function ActionCenterContent() {
                       {task.riskLevel.toUpperCase()} RISK
                     </Badge>
 
-                    <span className="text-[11px] text-brand-700/60">
+                    <span className="text-[11px] text-brand-700 font-medium">
                       Requires {task.requiredRole}
                     </span>
                   </div>
 
                   <h3 className="text-sm font-bold text-brand-900">{task.title}</h3>
-                  <p className="text-xs text-brand-700/80 leading-relaxed max-w-3xl">
+                  <p className="text-xs text-brand-700 leading-relaxed max-w-3xl">
                     {task.reason}
                   </p>
                 </div>
@@ -231,9 +237,9 @@ function ActionCenterContent() {
 
               {/* Verified Result Strip */}
               {task.verificationResult && (
-                <div className="mt-3 pt-3 border-t border-slateSurface-100 flex items-center gap-2 text-xs text-success-700">
-                  <CheckCircle2 className="w-4 h-4 shrink-0 text-success-600" />
-                  <span className="font-semibold">Verified Result:</span>
+                <div className="mt-3 pt-3 border-t border-slateSurface-100 flex items-center gap-2 text-xs text-success-700 dark:text-success-400">
+                  <CheckCircle2 className="w-4 h-4 shrink-0 text-success-600 dark:text-success-400" />
+                  <span className="font-semibold">Verified Result (Simulated):</span>
                   <span className="text-brand-900/80 truncate">
                     {task.verificationResult.message}
                   </span>
@@ -268,7 +274,7 @@ function ActionCenterContent() {
                 }
                 size="md"
               >
-                STATUS: {selectedTask.status.toUpperCase()}
+                STATUS: {selectedTask.status.toUpperCase()} (SIMULATED)
               </Badge>
               <Badge variant="outline" size="md">
                 RISK: {selectedTask.riskLevel.toUpperCase()}
@@ -308,6 +314,41 @@ function ActionCenterContent() {
               </div>
             </div>
 
+            {/* Editable Assumption if applicable */}
+            {selectedTask.status === "pending_approval" && selectedTask.type === "send_payment_reminder" && (
+              <div className="p-3.5 bg-brand-50 border border-slateSurface-200 rounded-xl space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <Calculator className="w-3.5 h-3.5 text-forest-action" />
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/60 px-1.5 py-0.5 rounded">
+                      Assumption
+                    </span>
+                  </div>
+                  <span className="text-[11px] text-brand-700 font-semibold">
+                    Prompt-Settlement Discount
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-3 pt-1">
+                  <div className="flex items-center gap-1">
+                    <input
+                      type="number"
+                      min="0"
+                      max="20"
+                      step="0.5"
+                      value={editableDiscount}
+                      onChange={(e) => setEditableDiscount(parseFloat(e.target.value) || 0)}
+                      className="w-20 px-2 py-1 text-xs font-mono font-bold bg-surface border border-slateSurface-300 rounded text-brand-900 focus:outline-none focus:ring-1 focus:ring-forest-action"
+                    />
+                    <span className="text-xs font-bold text-brand-900">%</span>
+                  </div>
+                  <div className="text-[11px] text-brand-700 font-semibold">
+                    Recomputed Inflow: {formatMinorUnits(recomputedInflowMinor, activeCurrency, countryConfig.locale)}
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Parameters Preview */}
             <div>
               <span className="font-bold text-brand-900 block mb-1">
@@ -321,14 +362,14 @@ function ActionCenterContent() {
             {/* Verification Result */}
             {selectedTask.verificationResult && (
               <div className="p-3.5 bg-success-50 border border-success-200 rounded-xl space-y-1">
-                <div className="flex items-center gap-1.5 font-bold text-success-800">
-                  <CheckCircle2 className="w-4 h-4 text-success-600" />
-                  Verified Final State
+                <div className="flex items-center gap-1.5 font-bold text-success-800 dark:text-success-300">
+                  <CheckCircle2 className="w-4 h-4 text-success-600 dark:text-success-400" />
+                  Verified Final State (Simulated Delivery)
                 </div>
-                <p className="text-success-900/80 leading-relaxed">
+                <p className="text-success-900/80 dark:text-success-200 leading-relaxed">
                   {selectedTask.verificationResult.message}
                 </p>
-                <div className="text-[11px] text-brand-700/60 pt-1">
+                <div className="text-[11px] text-brand-700 pt-1">
                   Verified at: {selectedTask.verificationResult.verifiedAt}
                 </div>
               </div>
@@ -336,7 +377,7 @@ function ActionCenterContent() {
 
             {/* Role Guard Warning */}
             {!permissions.canApproveActions && (
-              <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-900 text-xs">
+              <div className="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 rounded-lg text-amber-900 dark:text-amber-200 text-xs">
                 ⚠️ Your current role (<strong>{currentRole}</strong>) lacks approval permissions. Switch to <strong>Owner</strong> or <strong>Admin</strong> in the top bar to approve or execute this task.
               </div>
             )}
@@ -387,7 +428,7 @@ function ActionCenterContent() {
                     onClick={handleExecute}
                   >
                     <Play className="w-4 h-4" />
-                    Execute Approved Action
+                    Execute Approved Action (Simulated)
                   </Button>
                 )}
               </div>

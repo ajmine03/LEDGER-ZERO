@@ -146,7 +146,7 @@ export default function ReceivablesPage() {
                   return (
                     <div
                       key={inv.id}
-                      className="flex items-center justify-between p-2.5 bg-white border border-slateSurface-200 rounded-lg"
+                      className="flex items-center justify-between p-2.5 bg-surfaceSubtle border border-slateSurface-200 rounded-lg"
                     >
                       <div>
                         <div className="flex items-center gap-1.5 font-semibold text-brand-900">
