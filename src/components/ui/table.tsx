@@ -39,7 +39,7 @@ export function TableBody({
   ...props
 }: React.HTMLAttributes<HTMLTableSectionElement>) {
   return (
-    <tbody className={cn("divide-y divide-slateSurface-100 bg-white", className)} {...props}>
+    <tbody className={cn("divide-y divide-slateSurface-100 bg-surface", className)} {...props}>
       {children}
     </tbody>
   );

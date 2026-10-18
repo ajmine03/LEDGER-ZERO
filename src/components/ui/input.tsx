@@ -23,7 +23,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           type={type}
           id={id}
           className={cn(
-            "w-full px-3 py-2 text-sm bg-white border border-slateSurface-300 rounded-lg text-brand-900 placeholder:text-brand-700/40 focus:outline-none focus:ring-2 focus:ring-forest-action focus:border-forest-action transition-colors disabled:bg-slateSurface-100 disabled:cursor-not-allowed",
+            "w-full px-3 py-2 text-sm bg-surface border border-slateSurface-300 rounded-lg text-brand-900 placeholder:text-brand-700/50 focus:outline-none focus:ring-2 focus:ring-forest-action focus:border-forest-action transition-colors disabled:bg-slateSurface-100 disabled:cursor-not-allowed",
             error && "border-risk-500 focus:ring-risk-500",
             className
           )}

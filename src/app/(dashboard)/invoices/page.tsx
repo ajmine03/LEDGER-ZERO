@@ -61,7 +61,7 @@ export default function InvoicesPage() {
     fieldsConfidence: Record<string, number>;
   } | null>(null);
 
-  const loadInvoices = async () => {
+  const loadInvoices = React.useCallback(async () => {
     try {
       const list = await dataService.getInvoices({
         direction: directionFilter === "all" ? undefined : (directionFilter as InvoiceDirection),
@@ -71,11 +71,11 @@ export default function InvoicesPage() {
     } catch (err) {
       console.error("Error loading invoices:", err);
     }
-  };
+  }, [directionFilter, statusFilter]);
 
   useEffect(() => {
     loadInvoices();
-  }, [directionFilter, statusFilter]);
+  }, [loadInvoices]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

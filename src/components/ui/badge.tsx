@@ -28,9 +28,9 @@ export function Badge({
     success: "bg-success-50 text-success-700 border-success-200",
     warning: "bg-warning-50 text-warning-700 border-warning-200",
     risk: "bg-risk-50 text-risk-700 border-risk-200",
-    lime: "bg-lime-accent/40 text-brand-900 border-lime-accent",
-    outline: "bg-transparent text-brand-800 border-slateSurface-300",
-    simulated: "bg-amber-100/70 text-amber-900 border-amber-300 font-semibold tracking-wide",
+    lime: "bg-lime-accent/30 text-brand-900 border-lime-accent/70 dark:text-lime-accent",
+    outline: "bg-transparent text-brand-800 border-slateSurface-200",
+    simulated: "bg-amber-100/80 text-amber-950 border-amber-300 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-700/60 font-semibold tracking-wide",
   };
 
   const sizeStyles = {
@@ -44,7 +44,7 @@ export function Badge({
       {...props}
     >
       {variant === "simulated" && (
-        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 dark:bg-amber-400 animate-pulse" />
       )}
       {children}
     </span>

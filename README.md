@@ -16,6 +16,30 @@ All financial calculations are computed deterministically using integer minor un
 
 ---
 
+## 📸 Screenshots & UI Showcase
+
+LEDGER ZERO features an original design system built on CSS variable tokens supporting **Light, Dark, and System theme modes** with full WCAG AA contrast.
+
+### 1. Financial Command Center (Overview)
+- **Top Metrics:** Confirmed Cash Position ($20,000.00), Customer Receivables ($25,000.00), 7-Day Payables Due ($45,000.00), and 7-Day Net Liquidity Gap (-$25,000.00).
+- **Critical Alert Banner:** Informs operator of the Oct 21 liquidity deficit with a one-click *"Investigate with AI"* action.
+- **Interactive Projections:** 7-day and 30-day cash curves with zero-reserve reference line and shortfall zone highlights.
+
+### 2. Autonomous Financial Workspace (AI Workspace)
+- **Investigation Stream:** Live timeline showing tool arguments, outputs, verified ledger facts, and assumptions.
+- **Action Approval Card:** Dynamic prompt-settlement discount assumption (editable percentage field) that recomputes expected net inflow and shortfall reduction live.
+- **Simulated Execution Receipt:** Honest labeling displaying `"Logged in-app (simulated delivery)"`.
+
+### 3. Cash Flow & Scenario Simulator
+- **Scenario Curve Overlay:** Side-by-side comparison of baseline forecast against modified scenario with customer acceleration and supplier deferral.
+- **Non-Mutating Levers:** Toggleable assumptions that test resilience without altering live ledger records.
+
+### 4. Transactions Ledger & Invoices (Simulated OCR)
+- **CSV Import Engine:** Automatic duplicate detection, column mapping, and preview.
+- **Invoice Upload:** Simulated OCR parsing with per-field confidence badges (92% - 99%) and human-in-the-loop verification.
+
+---
+
 ## ⚡ Quick Start
 
 ### 1. Install Dependencies
@@ -50,7 +74,7 @@ npm run build
    - Pure, standalone calculation functions with zero UI imports, ready for direct backend reuse.
    - Calculates confirmed cash position, accounts receivable/payable summaries, aging brackets, 7/30-day forecast curves, and non-mutating scenario overlays.
    - Strict double-counting prevention: invoice payments automatically generate matching cash transactions and decrement receivable balances.
-3. **Universal-by-Design Localization:**
+3. **Universal-by-Design Localization & Multi-Currency:**
    - Integer minor units everywhere (USD 2, BDT 2, EUR 2, JPY 0, KWD 3).
    - Typed `CountryConfig` packs for United States, United Kingdom, European Union, India, Singapore, Nigeria, Brazil, and Bangladesh.
    - Instant currency and locale switcher in the top bar.
@@ -58,6 +82,8 @@ npm run build
    - Autonomous actions strictly require explicit human approval from an **Owner** or **Admin** role before execution.
    - Role switcher in the top navigation allows judges to test role permission boundaries live (e.g. Viewer cannot approve).
    - All simulated communications are honestly labeled **"Logged in-app (simulated delivery)"**.
+5. **Light / Dark / System Theme:**
+   - Persistent theme toggle in Topbar and Settings with zero flash on initial load.
 
 ---
 
@@ -79,18 +105,6 @@ For step-by-step click instructions, read [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRI
 - **[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md):** Architectural design, service contracts, data flow, and Mermaid diagram of the Observe-to-Verify loop.
 - **[`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md):** 3-5 minute judge walkthrough guide.
 - **[`docs/LIMITATIONS.md`](docs/LIMITATIONS.md):** Honest disclosure of mock implementations, prototype boundaries, and production roadmap.
-
----
-
-## 🚢 Deployment to Vercel
-
-LEDGER ZERO is fully compatible with standard Vercel Next.js App Router deployments:
-1. Push repository to GitHub.
-2. Import project into Vercel.
-3. Configure environment variables (optional):
-   - `NEXT_PUBLIC_DATA_MODE=mock` (default)
-   - `NEXT_PUBLIC_API_URL=https://api.yourdomain.com/v1` (when connecting live backend)
-4. Deploy with zero configuration required.
 
 ---
 

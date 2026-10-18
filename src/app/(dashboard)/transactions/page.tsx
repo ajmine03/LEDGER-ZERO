@@ -56,7 +56,7 @@ export default function TransactionsPage() {
   const [csvPreviewRows, setCsvPreviewRows] = useState<any[]>([]);
   const [csvResult, setCsvResult] = useState<{ imported: number; duplicates: number } | null>(null);
 
-  const loadTransactions = async () => {
+  const loadTransactions = React.useCallback(async () => {
     try {
       const { transactions: list, total } = await dataService.getTransactions({
         search: searchQuery,
@@ -68,11 +68,11 @@ export default function TransactionsPage() {
     } catch (err) {
       console.error("Error loading transactions:", err);
     }
-  };
+  }, [searchQuery, typeFilter, categoryFilter]);
 
   useEffect(() => {
     loadTransactions();
-  }, [searchQuery, typeFilter, categoryFilter]);
+  }, [loadTransactions]);
 
   const handleCreateTransaction = async (e: React.FormEvent) => {
     e.preventDefault();

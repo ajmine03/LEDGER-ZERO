@@ -5,9 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Bot, ArrowRight, Shield, Sparkles } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { ArrowRight, Sparkles } from "lucide-react";
 
 export default function SignInPage() {
   const router = useRouter();
@@ -34,10 +33,10 @@ export default function SignInPage() {
           </p>
         </div>
 
-        {/* Demo Fast Entry Banner */}
+        {/* One-Click Enter Demo Workspace Banner */}
         <div className="p-4 bg-brand-50 border border-brand-200 rounded-xl space-y-3">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-forest-action" />
+            <Sparkles className="w-4 h-4 text-forest-action shrink-0" />
             <span className="font-bold text-forest text-xs">
               Judge & Hackathon Instant Demo Mode
             </span>
@@ -48,11 +47,11 @@ export default function SignInPage() {
           <Button
             variant="lime"
             size="md"
-            className="w-full shadow-xs"
+            className="w-full shadow-xs font-bold text-forest"
             onClick={handleDemoSignIn}
           >
-            Launch Demo Workspace
-            <ArrowRight className="w-4 h-4 ml-1" />
+            Enter Demo Workspace
+            <ArrowRight className="w-4 h-4 ml-1.5" />
           </Button>
         </div>
 
@@ -97,7 +96,7 @@ export default function SignInPage() {
           </form>
 
           <div className="pt-2 text-center text-xs text-brand-700/70">
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
             <Link href="/onboarding" className="font-semibold text-forest-action hover:underline">
               Create New Business
             </Link>

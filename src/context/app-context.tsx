@@ -5,6 +5,8 @@ import { Business, Member, Role, ROLE_PERMISSIONS, PermissionMatrix } from "@/do
 import { CountryConfig, COUNTRY_CONFIGS, getCountryConfig } from "@/domain/countries";
 import { dataService, authService } from "@/services";
 
+export type ThemeMode = "light" | "dark" | "system";
+
 interface AppContextType {
   business: Business | null;
   currentMember: Member | null;
@@ -13,6 +15,9 @@ interface AppContextType {
   countryConfig: CountryConfig;
   activeCurrency: string;
   isSimulatedDemo: boolean;
+  theme: ThemeMode;
+  resolvedTheme: "light" | "dark";
+  setTheme: (theme: ThemeMode) => void;
   refreshData: () => Promise<void>;
   switchRole: (role: Role) => Promise<void>;
   switchCountryPreset: (countryCode: string) => Promise<void>;
@@ -21,11 +26,67 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
+const THEME_STORAGE_KEY = "ledger_zero_theme";
+
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [business, setBusiness] = useState<Business | null>(null);
   const [currentMember, setCurrentMember] = useState<Member | null>(null);
   const [currentRole, setCurrentRole] = useState<Role>("Owner");
   const [countryConfig, setCountryConfig] = useState<CountryConfig>(COUNTRY_CONFIGS.US);
+  const [theme, setThemeState] = useState<ThemeMode>("light");
+  const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("light");
+
+  // Initialize theme from storage
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(THEME_STORAGE_KEY) as ThemeMode | null;
+      if (stored && (stored === "light" || stored === "dark" || stored === "system")) {
+        setThemeState(stored);
+      }
+    } catch {
+      // Ignore in SSR
+    }
+  }, []);
+
+  // Sync theme changes with DOM and media query listener
+  useEffect(() => {
+    const applyTheme = () => {
+      let isDark = false;
+      if (theme === "dark") {
+        isDark = true;
+      } else if (theme === "system") {
+        isDark = typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches;
+      }
+
+      setResolvedTheme(isDark ? "dark" : "light");
+
+      if (typeof document !== "undefined") {
+        if (isDark) {
+          document.documentElement.classList.add("dark");
+        } else {
+          document.documentElement.classList.remove("dark");
+        }
+      }
+    };
+
+    applyTheme();
+
+    if (theme === "system" && typeof window !== "undefined") {
+      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+      const handler = () => applyTheme();
+      mediaQuery.addEventListener("change", handler);
+      return () => mediaQuery.removeEventListener("change", handler);
+    }
+  }, [theme]);
+
+  const setTheme = (newTheme: ThemeMode) => {
+    setThemeState(newTheme);
+    try {
+      localStorage.setItem(THEME_STORAGE_KEY, newTheme);
+    } catch {
+      // Ignore quota error
+    }
+  };
 
   const loadAppState = useCallback(async () => {
     try {
@@ -88,6 +149,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         countryConfig,
         activeCurrency: countryConfig.defaultCurrency,
         isSimulatedDemo: true,
+        theme,
+        resolvedTheme,
+        setTheme,
         refreshData: loadAppState,
         switchRole,
         switchCountryPreset,

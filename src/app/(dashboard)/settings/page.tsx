@@ -9,12 +9,14 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { COUNTRY_CONFIGS } from "@/domain/countries";
-import { Settings, RotateCcw, CheckCircle2, Shield, Globe, Bell } from "lucide-react";
+import { Settings, RotateCcw, CheckCircle2, Globe, Sun, Moon, Laptop } from "lucide-react";
 
 export default function SettingsPage() {
   const {
     business,
     countryConfig,
+    theme,
+    setTheme,
     switchCountryPreset,
     resetDemo,
     permissions,
@@ -56,7 +58,7 @@ export default function SettingsPage() {
             </Badge>
           </h1>
           <p className="text-xs text-brand-700/70 mt-1">
-            Configure entity profile, country localization packs, and mock demo data states.
+            Configure entity profile, theme preferences, country localization packs, and mock demo data states.
           </p>
         </div>
 
@@ -130,70 +132,124 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
 
-        {/* Localization & Country Config Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm flex items-center gap-2">
-              <Globe className="w-4 h-4 text-forest-action" />
-              Country & Jurisdiction Pack
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4 text-xs">
-            <div>
-              <label className="font-semibold text-brand-900 block mb-1.5">
-                Active Country Configuration Pack
-              </label>
-              <Select
-                value={countryConfig.code}
-                onChange={(e) => switchCountryPreset(e.target.value)}
-                options={Object.values(COUNTRY_CONFIGS).map((c) => ({
-                  value: c.code,
-                  label: `${c.name} (${c.defaultCurrency} - ${c.currencySymbol})`,
-                }))}
-              />
-              <p className="text-[11px] text-brand-700/60 mt-1">
-                Universal architecture: Adding support for a new country only requires adding a single typed config pack.
+        {/* Theme & Localization Settings Card */}
+        <div className="space-y-6">
+          {/* Appearance & Theme Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm flex items-center gap-2">
+                <Sun className="w-4 h-4 text-forest-action" />
+                Appearance & Theme
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3 text-xs">
+              <p className="text-brand-700/70">
+                Choose your preferred interface theme. Setting will be stored in your browser.
               </p>
-            </div>
+              <div className="grid grid-cols-3 gap-3 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setTheme("light")}
+                  className={`p-3 rounded-xl border text-center flex flex-col items-center gap-2 transition-all ${
+                    theme === "light"
+                      ? "border-forest-action bg-brand-50 font-bold text-forest"
+                      : "border-slateSurface-200 hover:bg-slateSurface-100 text-brand-800"
+                  }`}
+                >
+                  <Sun className="w-5 h-5 text-amber-500" />
+                  <span>Light</span>
+                </button>
 
-            <div className="p-3.5 bg-slateSurface-50 rounded-xl space-y-2 text-brand-800">
-              <div className="flex justify-between">
-                <span className="text-brand-700/60">Currency Code:</span>
-                <span className="font-mono font-bold">{countryConfig.defaultCurrency}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-brand-700/60">Minor Unit Precision:</span>
-                <span className="font-mono font-bold">{countryConfig.minorUnitDecimals} Decimals</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-brand-700/60">Default Time Zone:</span>
-                <span className="font-semibold">{countryConfig.timeZone}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-brand-700/60">Fiscal Year Start:</span>
-                <span className="font-semibold">Month {countryConfig.fiscalYearStartMonth}</span>
-              </div>
-            </div>
+                <button
+                  type="button"
+                  onClick={() => setTheme("dark")}
+                  className={`p-3 rounded-xl border text-center flex flex-col items-center gap-2 transition-all ${
+                    theme === "dark"
+                      ? "border-forest-action bg-brand-50 font-bold text-forest"
+                      : "border-slateSurface-200 hover:bg-slateSurface-100 text-brand-800"
+                  }`}
+                >
+                  <Moon className="w-5 h-5 text-lime-accent" />
+                  <span>Dark</span>
+                </button>
 
-            {/* Architecture Data Mode Indicator */}
-            <div className="pt-2 border-t border-slateSurface-100">
-              <span className="font-bold text-brand-900 block mb-1">
-                Data Layer Architecture Mode
-              </span>
-              <div className="p-3 bg-brand-50 border border-brand-200 rounded-xl flex items-center justify-between">
-                <div>
-                  <div className="font-semibold text-forest">NEXT_PUBLIC_DATA_MODE</div>
-                  <div className="text-[11px] text-brand-700/70">
-                    Switching to <code>api</code> connects to your backend teammate via <code>docs/BACKEND_CONTRACT.md</code>.
-                  </div>
+                <button
+                  type="button"
+                  onClick={() => setTheme("system")}
+                  className={`p-3 rounded-xl border text-center flex flex-col items-center gap-2 transition-all ${
+                    theme === "system"
+                      ? "border-forest-action bg-brand-50 font-bold text-forest"
+                      : "border-slateSurface-200 hover:bg-slateSurface-100 text-brand-800"
+                  }`}
+                >
+                  <Laptop className="w-5 h-5 text-brand-700" />
+                  <span>System</span>
+                </button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Localization & Country Config Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm flex items-center gap-2">
+                <Globe className="w-4 h-4 text-forest-action" />
+                Country & Jurisdiction Pack
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 text-xs">
+              <div>
+                <label className="font-semibold text-brand-900 block mb-1.5">
+                  Active Country Configuration Pack
+                </label>
+                <Select
+                  value={countryConfig.code}
+                  onChange={(e) => switchCountryPreset(e.target.value)}
+                  options={Object.values(COUNTRY_CONFIGS).map((c) => ({
+                    value: c.code,
+                    label: `${c.name} (${c.defaultCurrency} - ${c.currencySymbol})`,
+                  }))}
+                />
+                <p className="text-[11px] text-brand-700/60 mt-1">
+                  Universal architecture: Adding support for a new country only requires adding a single typed config pack.
+                </p>
+              </div>
+
+              <div className="p-3.5 bg-slateSurface-50 rounded-xl space-y-2 text-brand-800">
+                <div className="flex justify-between">
+                  <span className="text-brand-700/60">Currency Code:</span>
+                  <span className="font-mono font-bold">{countryConfig.defaultCurrency}</span>
                 </div>
-                <Badge variant="lime" size="md">
-                  Active: mock
-                </Badge>
+                <div className="flex justify-between">
+                  <span className="text-brand-700/60">Minor Unit Precision:</span>
+                  <span className="font-mono font-bold">{countryConfig.minorUnitDecimals} Decimals</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-brand-700/60">Default Time Zone:</span>
+                  <span className="font-semibold">{countryConfig.timeZone}</span>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+
+              {/* Architecture Data Mode Indicator */}
+              <div className="pt-2 border-t border-slateSurface-100">
+                <span className="font-bold text-brand-900 block mb-1">
+                  Data Layer Architecture Mode
+                </span>
+                <div className="p-3 bg-brand-50 border border-brand-200 rounded-xl flex items-center justify-between">
+                  <div>
+                    <div className="font-semibold text-forest">NEXT_PUBLIC_DATA_MODE</div>
+                    <div className="text-[11px] text-brand-700/70">
+                      Switching to <code>api</code> connects to your backend teammate via <code>docs/BACKEND_CONTRACT.md</code>.
+                    </div>
+                  </div>
+                  <Badge variant="lime" size="md">
+                    Active: mock
+                  </Badge>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );

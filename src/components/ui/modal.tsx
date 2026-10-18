@@ -48,10 +48,10 @@ export function Modal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-950/60 backdrop-blur-xs animate-in fade-in duration-150">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
       <div
         className={cn(
-          "w-full bg-white rounded-2xl shadow-dropdown border border-slateSurface-200 overflow-hidden flex flex-col max-h-[90vh]",
+          "w-full bg-surface text-foreground rounded-2xl shadow-dropdown border border-slateSurface-200 overflow-hidden flex flex-col max-h-[90vh]",
           maxWidthStyles[maxWidth]
         )}
         onClick={(e) => e.stopPropagation()}
