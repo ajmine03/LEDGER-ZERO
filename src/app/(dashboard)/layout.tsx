@@ -3,7 +3,6 @@
 import React from "react";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Topbar } from "@/components/layout/topbar";
-import { DemoBanner } from "@/components/layout/demo-banner";
 
 export default function DashboardLayout({
   children,
@@ -12,9 +11,6 @@ export default function DashboardLayout({
 }) {
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      {/* Persistent Honesty Banner */}
-      <DemoBanner />
-
       <div className="flex-1 flex overflow-hidden">
         {/* Desktop Navigation Sidebar */}
         <div className="hidden lg:flex shrink-0">

@@ -3,25 +3,21 @@
 import React, { useState } from "react";
 import { useApp } from "@/context/app-context";
 import {
-  Globe,
-  Shield,
-  ChevronDown,
-  Building,
-  User,
   Search,
   Sun,
   Moon,
   Menu,
   X,
+  LogOut,
+  ChevronDown,
+  Building,
 } from "lucide-react";
-import { Role } from "@/domain/types";
-import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   Bot,
-  Zap,
+  CheckSquare,
   TrendingUp,
   Receipt,
   FileText,
@@ -37,241 +33,243 @@ import {
 export function Topbar() {
   const {
     business,
-    currentMember,
-    currentRole,
-    countryConfig,
-    theme,
     resolvedTheme,
     setTheme,
-    switchRole,
+    countryConfig,
     switchCountryPreset,
+    isAuthenticated,
+    supabaseUser,
+    signOut,
   } = useApp();
 
   const pathname = usePathname();
-  const [showRoleDropdown, setShowRoleDropdown] = useState(false);
   const [showLocaleDropdown, setShowLocaleDropdown] = useState(false);
+  const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const availableRoles: Role[] = ["Owner", "Admin", "Accountant", "Viewer"];
-
   const localePresets = [
-    { code: "US", label: "USD - United States ($)", flag: "🇺🇸" },
-    { code: "EU", label: "EUR - European Union (€)", flag: "🇪🇺" },
-    { code: "BD", label: "BDT - Bangladesh (৳)", flag: "🇧🇩" },
-    { code: "GB", label: "GBP - United Kingdom (£)", flag: "🇬🇧" },
-    { code: "IN", label: "INR - India (₹)", flag: "🇮🇳" },
+    { code: "US", label: "USD ($) — United States" },
+    { code: "EU", label: "EUR (€) — Eurozone" },
+    { code: "GB", label: "GBP (£) — United Kingdom" },
+    { code: "BD", label: "BDT (৳) — Bangladesh" },
+    { code: "IN", label: "INR (₹) — India" },
   ];
 
   const mobileNavLinks = [
     { name: "Overview", href: "/", icon: LayoutDashboard },
-    { name: "AI Workspace", href: "/ai-workspace", icon: Bot },
-    { name: "Action Center", href: "/action-center", icon: Zap },
-    { name: "Cash Flow & Scenarios", href: "/cash-flow", icon: TrendingUp },
+    { name: "AI Assistant", href: "/ai-workspace", icon: Bot },
+    { name: "Pending Approvals", href: "/action-center", icon: CheckSquare },
+    { name: "Cash Flow & Forecasts", href: "/cash-flow", icon: TrendingUp },
     { name: "Transactions", href: "/transactions", icon: Receipt },
     { name: "Invoices", href: "/invoices", icon: FileText },
-    { name: "Receivables", href: "/receivables", icon: Users },
-    { name: "Payables", href: "/payables", icon: Building2 },
+    { name: "Customers & Receivables", href: "/receivables", icon: Users },
+    { name: "Suppliers & Payables", href: "/payables", icon: Building2 },
     { name: "Budgets", href: "/budgets", icon: PieChart },
-    { name: "Reports", href: "/reports", icon: BarChart3 },
-    { name: "Audit Logs", href: "/audit-logs", icon: History },
-    { name: "Team", href: "/team", icon: ShieldCheck },
+    { name: "Reports & Insights", href: "/reports", icon: BarChart3 },
+    { name: "Activity Log", href: "/audit-logs", icon: History },
+    { name: "Team & Permissions", href: "/team", icon: ShieldCheck },
     { name: "Settings", href: "/settings", icon: Settings },
   ];
 
+  const displayName =
+    (supabaseUser as any)?.user_metadata?.full_name ||
+    supabaseUser?.name ||
+    supabaseUser?.email?.split("@")[0] ||
+    "Business Owner";
+
+  const userInitial = displayName.charAt(0).toUpperCase();
+
   return (
     <>
-      <header className="h-16 bg-surface border-b border-slateSurface-200 px-4 sm:px-6 flex items-center justify-between shrink-0 select-none z-20">
-        {/* Left: Mobile menu toggle + Business entity indicator */}
-        <div className="flex items-center gap-2 sm:gap-3">
+      <header className="h-14 bg-surface border-b border-border px-4 sm:px-6 flex items-center justify-between shrink-0 select-none z-20">
+        {/* Left: Mobile Toggle + Business Name */}
+        <div className="flex items-center gap-3">
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-1.5 rounded-lg lg:hidden hover:bg-slateSurface-100 text-forest"
-            aria-label="Toggle navigation menu"
+            className="lg:hidden p-1.5 text-text-dim hover:text-foreground rounded-lg hover:bg-surface-subtle"
+            aria-label="Toggle Navigation Menu"
           >
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
 
-          <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-slateSurface-100 border border-slateSurface-200">
-            <Building className="w-3.5 h-3.5 text-forest-action shrink-0" />
-            <span className="text-xs sm:text-sm font-semibold text-brand-900 truncate max-w-[130px] sm:max-w-none">
-              {business?.name || "Harbor & Pine Supply Co."}
+          <div className="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-surface-subtle text-foreground border border-border/60">
+            <Building className="w-3.5 h-3.5 text-forest-action" />
+            <span className="text-xs font-semibold tracking-tight">
+              {business?.name || "My Business"}
             </span>
-            <Badge variant="outline" size="sm" className="hidden md:inline-flex text-[10px]">
-              Active
-            </Badge>
           </div>
         </div>
 
-        {/* Middle: Quick search bar */}
-        <div className="hidden xl:flex items-center relative w-64">
-          <Search className="w-4 h-4 text-brand-700/50 absolute left-3 top-2.5" />
-          <input
-            type="text"
-            placeholder="Search ledger..."
-            className="w-full pl-9 pr-3 py-1.5 text-xs bg-slateSurface-100 border border-slateSurface-200 rounded-lg text-brand-900 focus:outline-none focus:ring-1 focus:ring-forest-action placeholder:text-brand-700/40"
-          />
+        {/* Center: Clean Search Bar */}
+        <div className="hidden md:flex items-center flex-1 max-w-md mx-6">
+          <div className="relative w-full">
+            <Search className="w-3.5 h-3.5 text-text-dim absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <input
+              type="text"
+              placeholder="Search invoices, customers, transactions..."
+              className="w-full pl-9 pr-4 py-1.5 text-xs bg-surface-subtle border border-border rounded-lg text-foreground placeholder:text-text-dim/60 focus:outline-none focus:border-forest-action transition-colors"
+            />
+          </div>
         </div>
 
-        {/* Right: Controls, Theme Switcher, & Judge Switchers */}
-        <div className="flex items-center gap-1.5 sm:gap-2.5">
-          {/* Theme Switcher 1-Click Toggle */}
-          <button
-            onClick={() => {
-              setTheme(resolvedTheme === "dark" ? "light" : "dark");
-              setShowLocaleDropdown(false);
-              setShowRoleDropdown(false);
-            }}
-            className="p-2 rounded-lg bg-slateSurface-100 hover:bg-slateSurface-200 text-brand-900 border border-slateSurface-200 transition-colors"
-            title={`Switch to ${resolvedTheme === "dark" ? "Light" : "Dark"} Mode`}
-            aria-label={`Switch to ${resolvedTheme === "dark" ? "Light" : "Dark"} Mode`}
-          >
-            {resolvedTheme === "dark" ? (
-              <Moon className="w-4 h-4 text-lime-accent" />
-            ) : (
-              <Sun className="w-4 h-4 text-amber-500" />
-            )}
-          </button>
-
-          {/* Country / Currency Preset Switcher */}
+        {/* Right: Currency Selector, Theme Toggle & User Profile */}
+        <div className="flex items-center gap-2">
+          {/* Currency / Region Dropdown */}
           <div className="relative">
             <button
               onClick={() => {
                 setShowLocaleDropdown(!showLocaleDropdown);
-                setShowRoleDropdown(false);
+                setShowUserDropdown(false);
               }}
-              className="flex items-center gap-1 sm:gap-1.5 px-2 py-1.5 rounded-lg bg-slateSurface-100 hover:bg-slateSurface-200 text-xs font-medium text-brand-900 border border-slateSurface-200 transition-colors"
-              title="Switch Locale & Currency Preset"
+              className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold text-foreground bg-surface-subtle border border-border rounded-lg hover:bg-border/30 transition-colors"
             >
-              <Globe className="w-3.5 h-3.5 text-brand-700 shrink-0" />
-              <span className="font-mono font-semibold">{countryConfig.defaultCurrency}</span>
-              <ChevronDown className="w-3 h-3 text-brand-700/60" />
+              <span>{countryConfig?.defaultCurrency || "USD"}</span>
+              <ChevronDown className="w-3 h-3 text-text-dim" />
             </button>
 
             {showLocaleDropdown && (
-              <div className="absolute right-0 top-10 w-56 sm:w-60 bg-surface rounded-xl shadow-dropdown border border-slateSurface-200 py-1 z-30 animate-in fade-in duration-100">
-                <div className="px-3 py-1.5 text-[10px] uppercase font-bold text-brand-700/60 border-b border-slateSurface-100">
-                  Preset Currency & Format
+              <div className="absolute right-0 top-9 w-52 bg-surface border border-border rounded-xl shadow-lg p-1 z-30 animate-in fade-in">
+                <div className="px-3 py-1.5 text-[10px] font-semibold uppercase text-text-dim">
+                  Select Currency
                 </div>
-                {localePresets.map((preset) => (
+                {localePresets.map((locale) => (
                   <button
-                    key={preset.code}
+                    key={locale.code}
                     onClick={() => {
-                      switchCountryPreset(preset.code);
+                      switchCountryPreset(locale.code);
                       setShowLocaleDropdown(false);
                     }}
-                    className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between hover:bg-slateSurface-100 ${
-                      countryConfig.code === preset.code ? "bg-brand-50 text-forest font-semibold" : "text-brand-900"
+                    className={`w-full text-left px-3 py-2 text-xs rounded-lg transition-colors flex items-center justify-between ${
+                      countryConfig?.code === locale.code
+                        ? "bg-forest-action/10 text-forest-action font-semibold"
+                        : "text-foreground hover:bg-surface-subtle"
                     }`}
                   >
-                    <span className="flex items-center gap-2">
-                      <span>{preset.flag}</span>
-                      <span>{preset.label}</span>
-                    </span>
-                    {countryConfig.code === preset.code && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-forest-action" />
-                    )}
+                    <span>{locale.label}</span>
                   </button>
                 ))}
               </div>
             )}
           </div>
 
-          {/* Role Switcher (For Judges) */}
+          {/* Theme Switcher */}
+          <button
+            onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+            className="p-1.5 text-text-dim hover:text-foreground rounded-lg hover:bg-surface-subtle transition-colors"
+            aria-label="Toggle Color Theme"
+          >
+            {resolvedTheme === "dark" ? (
+              <Sun className="w-4 h-4 text-amber-400" />
+            ) : (
+              <Moon className="w-4 h-4" />
+            )}
+          </button>
+
+          {/* User Profile Pill & Dropdown */}
           <div className="relative">
             <button
               onClick={() => {
-                setShowRoleDropdown(!showRoleDropdown);
+                setShowUserDropdown(!showUserDropdown);
                 setShowLocaleDropdown(false);
               }}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-forest-action text-white hover:bg-forest-actionHover text-xs font-medium transition-colors shadow-xs"
-              title="Switch Team Role (Judge Test Feature)"
+              className="flex items-center gap-2 pl-2 pr-2.5 py-1 rounded-lg hover:bg-surface-subtle border border-transparent hover:border-border transition-colors"
             >
-              <Shield className="w-3.5 h-3.5 text-lime-accent shrink-0" />
-              <span className="font-semibold hidden xs:inline">{currentRole}</span>
-              <ChevronDown className="w-3 h-3 text-white/70" />
+              <div className="w-7 h-7 rounded-full bg-forest-action text-white flex items-center justify-center font-bold text-xs shrink-0">
+                {userInitial}
+              </div>
+              <span className="hidden sm:inline text-xs font-semibold text-foreground">
+                {displayName}
+              </span>
+              <ChevronDown className="w-3 h-3 text-text-dim" />
             </button>
 
-            {showRoleDropdown && (
-              <div className="absolute right-0 top-10 w-56 bg-surface rounded-xl shadow-dropdown border border-slateSurface-200 py-1 z-30 animate-in fade-in duration-100">
-                <div className="px-3 py-1.5 text-[10px] uppercase font-bold text-brand-700/60 border-b border-slateSurface-100">
-                  Judge Role Switcher
+            {showUserDropdown && (
+              <div className="absolute right-0 top-10 w-56 bg-surface border border-border rounded-xl shadow-lg p-1.5 z-30 animate-in fade-in">
+                <div className="px-3 py-2 border-b border-border/60 mb-1">
+                  <div className="text-xs font-semibold text-foreground truncate">{displayName}</div>
+                  <div className="text-[11px] text-text-dim truncate">
+                    {supabaseUser?.email || "owner@business.com"}
+                  </div>
                 </div>
-                {availableRoles.map((role) => (
+
+                <Link
+                  href="/settings"
+                  onClick={() => setShowUserDropdown(false)}
+                  className="w-full text-left px-3 py-1.5 text-xs text-foreground hover:bg-surface-subtle rounded-lg flex items-center gap-2 transition-colors"
+                >
+                  <Settings className="w-3.5 h-3.5 text-text-dim" />
+                  Workspace Settings
+                </Link>
+
+                <div className="border-t border-border/60 my-1" />
+
+                {isAuthenticated ? (
                   <button
-                    key={role}
                     onClick={() => {
-                      switchRole(role);
-                      setShowRoleDropdown(false);
+                      setShowUserDropdown(false);
+                      signOut();
                     }}
-                    className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between hover:bg-slateSurface-100 ${
-                      currentRole === role ? "bg-brand-50 text-forest font-semibold" : "text-brand-900"
-                    }`}
+                    className="w-full text-left px-3 py-1.5 text-xs text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-lg flex items-center gap-2 transition-colors"
                   >
-                    <div>
-                      <div className="font-medium">{role}</div>
-                      <div className="text-[10px] text-brand-700/60">
-                        {role === "Owner" && "Full administrative authorization"}
-                        {role === "Admin" && "Operations & approvals"}
-                        {role === "Accountant" && "Financial editor, no approvals"}
-                        {role === "Viewer" && "Read-only access"}
-                      </div>
-                    </div>
-                    {currentRole === role && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-forest-action" />
-                    )}
+                    <LogOut className="w-3.5 h-3.5" />
+                    Sign Out
                   </button>
-                ))}
+                ) : (
+                  <Link
+                    href="/sign-in"
+                    onClick={() => setShowUserDropdown(false)}
+                    className="w-full text-left px-3 py-1.5 text-xs text-forest-action hover:bg-forest-action/10 rounded-lg flex items-center gap-2 transition-colors"
+                  >
+                    Sign In to Account
+                  </Link>
+                )}
               </div>
             )}
-          </div>
-
-          {/* Member Avatar */}
-          <div className="flex items-center gap-2 pl-1 sm:pl-2 border-l border-slateSurface-200">
-            <div className="w-8 h-8 rounded-full bg-forest-action/10 border border-forest-action/20 flex items-center justify-center text-forest-action font-semibold text-xs">
-              {currentMember?.name ? currentMember.name.slice(0, 2).toUpperCase() : <User className="w-4 h-4" />}
-            </div>
           </div>
         </div>
       </header>
 
-      {/* Mobile Drawer (Visible on < 1024px when hamburger toggled) */}
+      {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-40 lg:hidden flex">
+        <div className="lg:hidden fixed inset-0 z-50 flex">
           <div
             className="fixed inset-0 bg-black/50 backdrop-blur-xs"
             onClick={() => setMobileMenuOpen(false)}
           />
-          <div className="relative w-72 max-w-[80vw] bg-surface border-r border-slateSurface-200 flex flex-col h-full z-50 p-4 space-y-4 shadow-xl">
-            <div className="flex items-center justify-between pb-3 border-b border-slateSurface-100">
-              <div className="font-bold text-sm text-forest flex items-center gap-2">
-                <span className="w-7 h-7 rounded-lg bg-forest text-lime-accent flex items-center justify-center text-xs font-black">
+          <div className="relative w-72 max-w-[80vw] bg-surface border-r border-border h-full flex flex-col p-4 shadow-2xl z-10">
+            <div className="flex items-center justify-between pb-4 border-b border-border">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-forest flex items-center justify-center text-lime-accent font-black text-sm">
                   Ø
-                </span>
-                LEDGER ZERO
+                </div>
+                <span className="font-bold text-sm text-foreground">LEDGER ZERO</span>
               </div>
               <button
                 onClick={() => setMobileMenuOpen(false)}
-                className="p-1 rounded-lg text-brand-700 hover:bg-slateSurface-100"
+                className="p-1 rounded-lg text-text-dim hover:text-foreground"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <nav className="flex-1 overflow-y-auto space-y-1">
-              {mobileNavLinks.map((link) => {
-                const isActive = link.href === "/" ? pathname === "/" : pathname.startsWith(link.href);
-                const Icon = link.icon;
+            <nav className="flex-1 overflow-y-auto py-3 space-y-1">
+              {mobileNavLinks.map((item) => {
+                const isActive =
+                  item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+                const Icon = item.icon;
                 return (
                   <Link
-                    key={link.name}
-                    href={link.href}
+                    key={item.name}
+                    href={item.href}
                     onClick={() => setMobileMenuOpen(false)}
-                    className={`flex items-center gap-3 px-3 py-2 text-xs font-semibold rounded-lg transition-colors ${
-                      isActive ? "bg-brand-50 text-forest-action" : "text-brand-800 hover:bg-slateSurface-100"
+                    className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                      isActive
+                        ? "bg-forest-action/10 text-forest-action font-semibold"
+                        : "text-foreground/80 hover:bg-surface-subtle"
                     }`}
                   >
                     <Icon className="w-4 h-4" />
-                    <span>{link.name}</span>
+                    {item.name}
                   </Link>
                 );
               })}

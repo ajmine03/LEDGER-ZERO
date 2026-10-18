@@ -53,19 +53,11 @@ export default function SettingsPage() {
         <div>
           <h1 className="text-2xl font-bold text-forest tracking-tight flex items-center gap-2">
             System Settings & Profile
-            <Badge variant="outline" size="sm">
-              Universal Edition
-            </Badge>
           </h1>
           <p className="text-xs text-brand-700/70 mt-1">
-            Configure entity profile, theme preferences, country localization packs, and mock demo data states.
+            Configure business entity profile, tax identifiers, jurisdictional rules, and display preferences.
           </p>
         </div>
-
-        <Button variant="danger" size="sm" onClick={resetDemo}>
-          <RotateCcw className="w-3.5 h-3.5" />
-          Reset Demo Data to Seed
-        </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -233,17 +225,17 @@ export default function SettingsPage() {
               {/* Architecture Data Mode Indicator */}
               <div className="pt-2 border-t border-slateSurface-100">
                 <span className="font-bold text-brand-900 block mb-1">
-                  Data Layer Architecture Mode
+                  Backend Connection Status
                 </span>
                 <div className="p-3 bg-brand-50 border border-brand-200 rounded-xl flex items-center justify-between">
                   <div>
-                    <div className="font-semibold text-forest">NEXT_PUBLIC_DATA_MODE</div>
+                    <div className="font-semibold text-forest">Supabase Cloud Backend</div>
                     <div className="text-[11px] text-brand-700/70">
-                      Switching to <code>api</code> connects to your backend teammate via <code>docs/BACKEND_CONTRACT.md</code>.
+                      Live authentication, PostgreSQL database persistence, and sessions active.
                     </div>
                   </div>
                   <Badge variant="lime" size="md">
-                    Active: mock
+                    Active
                   </Badge>
                 </div>
               </div>

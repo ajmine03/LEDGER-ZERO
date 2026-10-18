@@ -4,6 +4,7 @@ import React, { createContext, useContext, useEffect, useState, useCallback } fr
 import { Business, Member, Role, ROLE_PERMISSIONS, PermissionMatrix } from "@/domain/types";
 import { CountryConfig, COUNTRY_CONFIGS, getCountryConfig } from "@/domain/countries";
 import { dataService, authService } from "@/services";
+import { getSupabaseClient } from "@/lib/supabase/client";
 
 export type ThemeMode = "light" | "dark" | "system";
 
@@ -15,6 +16,8 @@ interface AppContextType {
   countryConfig: CountryConfig;
   activeCurrency: string;
   isSimulatedDemo: boolean;
+  isAuthenticated: boolean;
+  supabaseUser: { id: string; email: string; name: string } | null;
   theme: ThemeMode;
   resolvedTheme: "light" | "dark";
   setTheme: (theme: ThemeMode) => void;
@@ -22,6 +25,7 @@ interface AppContextType {
   switchRole: (role: Role) => Promise<void>;
   switchCountryPreset: (countryCode: string) => Promise<void>;
   resetDemo: () => Promise<void>;
+  signOut: () => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -35,6 +39,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [countryConfig, setCountryConfig] = useState<CountryConfig>(COUNTRY_CONFIGS.US);
   const [theme, setThemeState] = useState<ThemeMode>("light");
   const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("light");
+  const [supabaseUser, setSupabaseUser] = useState<{ id: string; email: string; name: string } | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   // Initialize theme from storage
   useEffect(() => {
@@ -48,7 +54,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // Sync theme changes with DOM and media query listener
+  // Sync theme
   useEffect(() => {
     const applyTheme = () => {
       let isDark = false;
@@ -87,6 +93,44 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       // Ignore quota error
     }
   };
+
+  // Listen to Supabase auth state
+  useEffect(() => {
+    const supabase = getSupabaseClient();
+
+    const syncUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setSupabaseUser({
+          id: user.id,
+          email: user.email ?? "",
+          name: user.user_metadata?.full_name ?? user.email?.split("@")[0] ?? "User",
+        });
+        setIsAuthenticated(true);
+      } else {
+        setSupabaseUser(null);
+        setIsAuthenticated(false);
+      }
+    };
+
+    syncUser();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
+      if (session?.user) {
+        setSupabaseUser({
+          id: session.user.id,
+          email: session.user.email ?? "",
+          name: session.user.user_metadata?.full_name ?? session.user.email?.split("@")[0] ?? "User",
+        });
+        setIsAuthenticated(true);
+      } else {
+        setSupabaseUser(null);
+        setIsAuthenticated(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const loadAppState = useCallback(async () => {
     try {
@@ -137,18 +181,41 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     await loadAppState();
   };
 
+  const signOut = async () => {
+    const supabase = getSupabaseClient();
+    await supabase.auth.signOut();
+    setSupabaseUser(null);
+    setIsAuthenticated(false);
+  };
+
   const permissions = ROLE_PERMISSIONS[currentRole] || ROLE_PERMISSIONS.Viewer;
+
+  // isSimulatedDemo = true when no real Supabase session
+  const isSimulatedDemo = !isAuthenticated;
 
   return (
     <AppContext.Provider
       value={{
         business,
-        currentMember,
+        currentMember: supabaseUser
+          ? {
+              ...(currentMember || {
+                id: supabaseUser.id,
+                businessId: business?.id || "biz-1",
+                role: currentRole,
+                createdAt: new Date().toISOString(),
+              }),
+              name: supabaseUser.name,
+              email: supabaseUser.email,
+            }
+          : currentMember,
         currentRole,
         permissions,
         countryConfig,
         activeCurrency: countryConfig.defaultCurrency,
-        isSimulatedDemo: true,
+        isSimulatedDemo,
+        isAuthenticated,
+        supabaseUser,
         theme,
         resolvedTheme,
         setTheme,
@@ -156,6 +223,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         switchRole,
         switchCountryPreset,
         resetDemo,
+        signOut,
       }}
     >
       {children}

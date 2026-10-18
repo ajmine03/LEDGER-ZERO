@@ -17,10 +17,9 @@ import { CashChart } from "@/components/finance/cash-chart";
 import { AgingChart } from "@/components/finance/aging-chart";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { CurrencyAmount } from "@/components/finance/currency-amount";
 import {
-  AlertTriangle,
+  AlertCircle,
   ArrowRight,
   Bot,
   Zap,
@@ -32,7 +31,7 @@ import Link from "next/link";
 import { formatShortDate } from "@/lib/dates";
 
 export default function OverviewPage() {
-  const { permissions, currentRole } = useApp();
+  const { permissions } = useApp();
   const [cashPos, setCashPos] = useState<CashPosition | null>(null);
   const [recSummary, setRecSummary] = useState<ReceivablesSummary | null>(null);
   const [paySummary, setPaySummary] = useState<PayablesSummary | null>(null);
@@ -54,7 +53,7 @@ export default function OverviewPage() {
         dataService.getReceivablesAging(),
         actionService.getActionTasks({ status: "pending_approval" }),
         dataService.getAnomalies(),
-        dataService.getAuditLogs(6),
+        dataService.getAuditLogs(5),
       ]);
       setCashPos(cp);
       setRecSummary(rs);
@@ -79,79 +78,61 @@ export default function OverviewPage() {
   const hasShortfall = (forecast && forecast.minimumCash < 0) || net7DayGap < 0;
 
   return (
-    <div className="space-y-6">
-      {/* Page Title & Status */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slateSurface-200">
+    <div className="space-y-6 fade-in select-none">
+      {/* Page Title & Quick Actions */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border">
         <div>
-          <h1 className="text-2xl font-bold text-forest tracking-tight flex items-center gap-2">
-            Financial Command Center
-            <Badge variant="simulated" size="sm">
-              Simulated
-            </Badge>
+          <h1 className="text-xl font-bold tracking-tight text-foreground">
+            Financial Overview
           </h1>
-          <p className="text-xs text-brand-700/70 mt-1">
-            Real-time liquidity surveillance, deterministic forecasting, and agent-driven interventions.
+          <p className="text-xs text-text-dim mt-0.5">
+            Real-time summary of cash balance, receivables, and upcoming obligations.
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2">
           <Link href="/ai-workspace">
-            <Button variant="lime" size="sm" className="shadow-xs">
-              <Bot className="w-4 h-4 text-forest" />
-              Launch AI Workspace
+            <Button variant="primary" size="sm" className="font-semibold shadow-xs">
+              <Sparkles className="w-3.5 h-3.5 mr-1.5" />
+              Ask AI Co-Pilot
             </Button>
           </Link>
           <Link href="/action-center">
-            <Button variant="outline" size="sm">
-              <Zap className="w-4 h-4 text-amber-600" />
-              Action Queue ({pendingTasks.length})
+            <Button variant="outline" size="sm" className="text-xs">
+              <Zap className="w-3.5 h-3.5 mr-1 text-amber-500" />
+              Approvals ({pendingTasks.length})
             </Button>
           </Link>
         </div>
       </div>
 
-      {/* Critical Liquidity Alert Banner */}
+      {/* Sleek Liquidity Alert Callout */}
       {hasShortfall && (
-        <div className="bg-risk-50 border-l-4 border-risk-500 p-4 rounded-xl shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4 animate-in fade-in">
-          <div className="flex items-start gap-3">
-            <div className="p-2 bg-risk-100 rounded-lg text-risk-600 shrink-0 mt-0.5">
-              <AlertTriangle className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h4 className="text-sm font-bold text-risk-700">
-                  CRITICAL: Projected Working Capital Shortfall Detected
-                </h4>
-                <Badge variant="risk" size="sm">
-                  Deficit on {forecast?.firstShortfallDate || "Oct 21"}
-                </Badge>
-              </div>
-              <p className="text-xs text-risk-800/80 mt-1 max-w-2xl leading-relaxed">
-                Available cash of <strong>$20,000.00</strong> will be depleted by upcoming supplier obligations of <strong>$45,000.00</strong> within 5 days, causing a projected gap of <strong>-$25,000.00</strong>.
-              </p>
+        <div className="p-3.5 bg-rose-50/70 dark:bg-rose-950/20 border border-rose-200/80 dark:border-rose-900/40 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in">
+          <div className="flex items-center gap-2.5">
+            <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" />
+            <div className="text-xs text-rose-900 dark:text-rose-200">
+              <span className="font-semibold">Projected Cash Shortfall:</span> Available cash of{" "}
+              <strong>$20,000.00</strong> will not cover upcoming payables of{" "}
+              <strong>$45,000.00</strong> due within 5 days.
             </div>
           </div>
 
-          <div className="shrink-0 flex items-center gap-2">
-            <Link href="/ai-workspace?prompt=Help%20me%20avoid%20a%20cash%20shortage%20next%20week">
-              <Button variant="danger" size="sm" className="shadow-sm">
-                <Sparkles className="w-4 h-4" />
-                Investigate with AI
-                <ArrowRight className="w-4 h-4 ml-1" />
-              </Button>
-            </Link>
-          </div>
+          <Link href="/ai-workspace?prompt=Help%20me%20avoid%20a%20cash%20shortage%20next%20week">
+            <button className="text-xs font-semibold text-rose-700 dark:text-rose-300 hover:text-rose-900 flex items-center gap-1 shrink-0">
+              Get AI Advice
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </Link>
         </div>
       )}
 
-      {/* Top 4 Financial Metric Cards */}
+      {/* Top 4 Financial Metric Cards — Clean & Minimal */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard
-          title="Confirmed Cash Position"
+          title="Cash Position"
           amount={cashPos?.currentCash || 0}
-          definition="Total verified liquid funds across all business operating accounts."
-          period="Current balance"
-          source="Bank ledger & settled transactions"
+          period="Verified bank funds"
           href="/transactions"
           trend={{ value: "+$4,500 settled", isPositive: true }}
         />
@@ -159,65 +140,65 @@ export default function OverviewPage() {
         <MetricCard
           title="Customer Receivables"
           amount={recSummary?.totalReceivables || 0}
-          definition="Total unpaid invoices issued to customers minus partial collections."
-          period="Open receivables"
-          source="Customer accounts ledger"
+          period="Open customer invoices"
           href="/receivables"
           variant={recSummary?.overdueAmount ? "warning" : "default"}
+          trend={{ value: "4 invoices open", isPositive: true }}
         />
 
         <MetricCard
-          title="7-Day Payables Due"
+          title="Upcoming Payables"
           amount={paySummary?.dueWithin7Days || 0}
-          definition="Supplier bills and committed vendor invoices maturing within 7 calendar days."
-          period="Next 7 days"
-          source="Accounts payable ledger"
+          period="Due within 7 days"
           href="/payables"
           variant="risk"
+          trend={{ value: "High urgency", isPositive: false }}
         />
 
         <MetricCard
           title="7-Day Liquidity Buffer"
           amount={net7DayGap}
-          definition="Projected cash balance in 7 days assuming zero additional customer collections."
-          period="T+7 days"
-          source="Deterministic forecast engine"
+          period="Estimated net balance"
           href="/cash-flow"
           variant={net7DayGap < 0 ? "risk" : "success"}
-          trend={{ value: net7DayGap < 0 ? "Shortfall alert" : "Surplus", isPositive: net7DayGap >= 0 }}
+          trend={{
+            value: net7DayGap < 0 ? "Shortfall alert" : "Safe liquidity",
+            isPositive: net7DayGap >= 0,
+          }}
         />
       </div>
 
-      {/* Main Charts & Investigation Section */}
+      {/* Main Charts: Cash Flow Forecast & Receivables Aging */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Cash Flow Forecast Chart (2 Columns) */}
-        <Card className="lg:col-span-2">
-          <CardHeader>
+        {/* Cash Balance Forecast Chart */}
+        <Card className="lg:col-span-2 border-border shadow-xs">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
             <div>
-              <CardTitle className="flex items-center gap-2">
-                Cash Balance Trajectory
-                <Badge variant="outline" size="sm">
-                  Deterministic
-                </Badge>
+              <CardTitle className="text-sm font-bold text-foreground">
+                Cash Flow Forecast
               </CardTitle>
-              <p className="text-xs text-brand-700/70 mt-0.5">
-                Projections calculated directly from open invoice due dates and settled cash positions.
+              <p className="text-xs text-text-dim mt-0.5">
+                Projected cash balance trajectory based on scheduled payments.
               </p>
             </div>
 
-            <div className="flex items-center gap-1 bg-slateSurface-100 p-1 rounded-lg border border-slateSurface-200">
+            <div className="flex items-center gap-1 bg-surface-subtle p-1 rounded-lg border border-border">
               <button
                 onClick={() => setForecastDays(7)}
-                className={`px-3 py-1 text-xs font-semibold rounded-md transition-colors ${
-                  forecastDays === 7 ? "bg-surface text-forest font-bold shadow-xs border border-slateSurface-200" : "text-brand-700 hover:text-brand-900"
+                className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors ${
+                  forecastDays === 7
+                    ? "bg-surface text-foreground font-bold shadow-xs border border-border"
+                    : "text-text-dim hover:text-foreground"
                 }`}
               >
                 7 Days
               </button>
               <button
                 onClick={() => setForecastDays(30)}
-                className={`px-3 py-1 text-xs font-semibold rounded-md transition-colors ${
-                  forecastDays === 30 ? "bg-surface text-forest font-bold shadow-xs border border-slateSurface-200" : "text-brand-700 hover:text-brand-900"
+                className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors ${
+                  forecastDays === 30
+                    ? "bg-surface text-foreground font-bold shadow-xs border border-border"
+                    : "text-text-dim hover:text-foreground"
                 }`}
               >
                 30 Days
@@ -226,24 +207,28 @@ export default function OverviewPage() {
           </CardHeader>
 
           <CardContent>
-            {forecast && <CashChart projections={forecast.dailyProjections} height={280} />}
+            {forecast && <CashChart projections={forecast.dailyProjections} height={260} />}
 
-            <div className="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-slateSurface-100 text-xs">
+            <div className="grid grid-cols-3 gap-4 mt-4 pt-3 border-t border-border/60 text-xs">
               <div>
-                <span className="text-brand-700/60 block">Minimum Cash</span>
-                <span className={`font-mono font-bold text-sm ${forecast?.minimumCash! < 0 ? "text-risk-600" : "text-forest"}`}>
+                <span className="text-text-dim block">Minimum Cash</span>
+                <span
+                  className={`font-semibold text-sm tabular-nums ${
+                    forecast?.minimumCash! < 0 ? "text-rose-600" : "text-emerald-600"
+                  }`}
+                >
                   <CurrencyAmount amount={forecast?.minimumCash || 0} colored />
                 </span>
               </div>
               <div>
-                <span className="text-brand-700/60 block">Expected 7D Inflows</span>
-                <span className="font-mono font-bold text-sm text-forest">
+                <span className="text-text-dim block">Expected Inflows</span>
+                <span className="font-semibold text-sm tabular-nums text-foreground">
                   <CurrencyAmount amount={forecast?.totalExpectedInflows || 0} />
                 </span>
               </div>
               <div>
-                <span className="text-brand-700/60 block">Scheduled 7D Outflows</span>
-                <span className="font-mono font-bold text-sm text-risk-600">
+                <span className="text-text-dim block">Scheduled Outflows</span>
+                <span className="font-semibold text-sm tabular-nums text-rose-600">
                   <CurrencyAmount amount={forecast?.totalScheduledOutflows || 0} />
                 </span>
               </div>
@@ -251,29 +236,34 @@ export default function OverviewPage() {
           </CardContent>
         </Card>
 
-        {/* Receivables Aging Schedule (1 Column) */}
-        <Card>
-          <CardHeader>
+        {/* Receivables Aging Schedule */}
+        <Card className="border-border shadow-xs">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
             <div>
-              <CardTitle>Receivables Aging</CardTitle>
-              <p className="text-xs text-brand-700/70 mt-0.5">
-                Overdue customer balances by aging bracket
+              <CardTitle className="text-sm font-bold text-foreground">
+                Receivables Aging
+              </CardTitle>
+              <p className="text-xs text-text-dim mt-0.5">
+                Outstanding balances by days overdue
               </p>
             </div>
-            <Link href="/receivables" className="text-xs font-semibold text-forest-action hover:underline">
+            <Link
+              href="/receivables"
+              className="text-xs font-semibold text-forest-action hover:underline"
+            >
               View All
             </Link>
           </CardHeader>
 
           <CardContent>
-            <AgingChart buckets={agingBuckets} height={210} />
+            <AgingChart buckets={agingBuckets} height={200} />
 
-            <div className="mt-4 p-3 bg-warning-50/50 border border-warning-200 rounded-lg text-xs">
-              <div className="flex items-center justify-between font-semibold text-warning-800">
+            <div className="mt-4 p-3 bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200/80 dark:border-amber-900/40 rounded-xl text-xs">
+              <div className="flex items-center justify-between font-semibold text-amber-900 dark:text-amber-200">
                 <span>Apex Retail Partners</span>
-                <span className="font-mono">$15,000.00</span>
+                <span className="tabular-nums font-bold">$15,000.00</span>
               </div>
-              <p className="text-brand-700/70 text-[11px] mt-1">
+              <p className="text-text-dim text-[11px] mt-1 leading-relaxed">
                 Invoice INV-2026-089 is <strong>6 days overdue</strong>. Recommended for expedited collection with 2% discount incentive.
               </p>
             </div>
@@ -281,76 +271,68 @@ export default function OverviewPage() {
         </Card>
       </div>
 
-      {/* Action Center Queue & Agent Activity */}
+      {/* Pending Approvals & Activity Logs */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Pending Actions Requiring Human Approval */}
-        <Card>
-          <CardHeader>
+        {/* Pending Actions */}
+        <Card className="border-border shadow-xs">
+          <CardHeader className="flex flex-row items-center justify-between pb-3 border-b border-border/60">
             <div className="flex items-center gap-2">
               <Zap className="w-4 h-4 text-amber-500" />
-              <CardTitle>Autonomous Action Queue</CardTitle>
-              <Badge variant="warning" size="sm">
-                {pendingTasks.length} Pending Approval
-              </Badge>
+              <CardTitle className="text-sm font-bold text-foreground">
+                Pending Approvals
+              </CardTitle>
+              {pendingTasks.length > 0 && (
+                <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300 text-[11px] font-bold">
+                  {pendingTasks.length} Awaiting
+                </span>
+              )}
             </div>
-            <Link href="/action-center" className="text-xs font-semibold text-forest-action hover:underline">
-              Open Action Center
+            <Link
+              href="/action-center"
+              className="text-xs font-semibold text-forest-action hover:underline"
+            >
+              Open Center
             </Link>
           </CardHeader>
 
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-3 pt-3">
             {pendingTasks.length === 0 ? (
-              <div className="p-6 text-center text-xs text-brand-700/60">
-                No actions currently pending approval. All proposed interventions have been resolved.
+              <div className="py-8 text-center text-xs text-text-dim">
+                No actions currently pending approval. All recommendations resolved.
               </div>
             ) : (
               pendingTasks.map((task) => (
                 <div
                   key={task.id}
-                  className="p-4 border border-slateSurface-200 rounded-xl bg-surfaceSubtle hover:border-brand-300 transition-all space-y-3"
+                  className="p-3.5 border border-border rounded-xl bg-surface-subtle hover:border-forest-action/30 transition-all space-y-2.5"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <div className="flex items-center gap-2">
-                        <Badge
-                          variant={task.riskLevel === "high" ? "risk" : "warning"}
-                          size="sm"
-                        >
-                          {task.riskLevel.toUpperCase()} RISK
-                        </Badge>
-                        <span className="text-[10px] text-brand-700 font-medium">
-                          Requires {task.requiredRole} approval
-                        </span>
-                      </div>
-                      <h4 className="text-sm font-semibold text-brand-900 mt-1.5">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                        {task.riskLevel} Risk • Requires {task.requiredRole}
+                      </span>
+                      <h4 className="text-xs font-bold text-foreground mt-0.5">
                         {task.title}
                       </h4>
-                      <p className="text-xs text-brand-700 mt-1 leading-relaxed">
+                      <p className="text-xs text-text-dim mt-0.5 leading-relaxed">
                         {task.reason}
                       </p>
                     </div>
                   </div>
 
-                  <div className="p-2.5 bg-surface rounded-lg text-xs text-brand-800 border border-slateSurface-200">
-                    <span className="font-semibold text-forest">Expected Outcome:</span>{" "}
-                    {task.expectedOutcome}
-                  </div>
-
-                  <div className="flex items-center justify-between pt-1">
-                    <Link
-                      href={`/action-center?taskId=${task.id}`}
-                      className="text-xs font-semibold text-forest-action hover:underline"
-                    >
-                      Inspect Evidence & Review
-                    </Link>
+                  <div className="flex items-center justify-between pt-1 border-t border-border/40">
+                    <span className="text-xs font-semibold text-forest-action">
+                      Outcome: {task.expectedOutcome}
+                    </span>
 
                     <Link href={`/action-center?taskId=${task.id}`}>
                       <Button
                         variant="primary"
                         size="sm"
+                        className="text-xs font-semibold"
                         disabled={!permissions.canApproveActions}
                       >
-                        Review & Approve
+                        Review Action
                       </Button>
                     </Link>
                   </div>
@@ -360,23 +342,28 @@ export default function OverviewPage() {
           </CardContent>
         </Card>
 
-        {/* Recent Autonomous Agent Audit Trail */}
-        <Card>
-          <CardHeader>
+        {/* Recent Activity Log */}
+        <Card className="border-border shadow-xs">
+          <CardHeader className="flex flex-row items-center justify-between pb-3 border-b border-border/60">
             <div className="flex items-center gap-2">
               <Bot className="w-4 h-4 text-forest-action" />
-              <CardTitle>Autonomous Agent Activity & Audit Trail</CardTitle>
+              <CardTitle className="text-sm font-bold text-foreground">
+                Activity Trail
+              </CardTitle>
             </div>
-            <Link href="/audit-logs" className="text-xs font-semibold text-forest-action hover:underline">
-              Full Audit Log
+            <Link
+              href="/audit-logs"
+              className="text-xs font-semibold text-forest-action hover:underline"
+            >
+              Full Log
             </Link>
           </CardHeader>
 
-          <CardContent>
-            <div className="space-y-3.5">
+          <CardContent className="pt-3">
+            <div className="space-y-3">
               {recentLogs.map((log) => (
                 <div key={log.id} className="flex items-start gap-3 text-xs">
-                  <div className="mt-0.5 p-1 rounded-full bg-slateSurface-100 text-brand-700 shrink-0">
+                  <div className="mt-0.5 p-1 rounded-full bg-surface-subtle text-text-dim shrink-0">
                     {log.actorType === "agent" ? (
                       <Bot className="w-3.5 h-3.5 text-forest-action" />
                     ) : (
@@ -385,15 +372,15 @@ export default function OverviewPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="font-semibold text-brand-900 truncate">
+                      <span className="font-semibold text-foreground truncate">
                         {log.actorName}
                       </span>
-                      <span className="text-[10px] text-brand-700/50 shrink-0 flex items-center gap-1">
+                      <span className="text-[10px] text-text-dim shrink-0 flex items-center gap-1 tabular-nums">
                         <Clock className="w-3 h-3" />
                         {formatShortDate(log.timestamp)}
                       </span>
                     </div>
-                    <p className="text-brand-700/80 mt-0.5 leading-relaxed">
+                    <p className="text-text-dim mt-0.5 leading-relaxed">
                       {log.details}
                     </p>
                   </div>

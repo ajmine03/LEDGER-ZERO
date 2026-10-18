@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   Bot,
-  Zap,
+  CheckSquare,
   TrendingUp,
   Receipt,
   FileText,
@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { actionService } from "@/services";
+import { useApp } from "@/context/app-context";
 
 interface NavItem {
   name: string;
@@ -35,6 +36,7 @@ interface NavGroup {
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { business } = useApp();
   const [pendingApprovalsCount, setPendingApprovalsCount] = useState<number>(0);
 
   useEffect(() => {
@@ -53,21 +55,21 @@ export function Sidebar() {
 
   const navigationGroups: NavGroup[] = [
     {
-      label: "Autonomous Hub",
+      label: "Dashboard",
       items: [
         { name: "Overview", href: "/", icon: LayoutDashboard },
-        { name: "AI Workspace", href: "/ai-workspace", icon: Bot },
+        { name: "AI Assistant", href: "/ai-workspace", icon: Bot },
         {
-          name: "Action Center",
+          name: "Pending Approvals",
           href: "/action-center",
-          icon: Zap,
+          icon: CheckSquare,
           badge: pendingApprovalsCount,
         },
-        { name: "Cash Flow & Scenarios", href: "/cash-flow", icon: TrendingUp },
+        { name: "Cash Flow & Forecasts", href: "/cash-flow", icon: TrendingUp },
       ],
     },
     {
-      label: "Ledger & Operations",
+      label: "Finance",
       items: [
         { name: "Transactions", href: "/transactions", icon: Receipt },
         { name: "Invoices", href: "/invoices", icon: FileText },
@@ -76,11 +78,11 @@ export function Sidebar() {
       ],
     },
     {
-      label: "Intelligence & Team",
+      label: "Management",
       items: [
         { name: "Budgets", href: "/budgets", icon: PieChart },
         { name: "Reports & Insights", href: "/reports", icon: BarChart3 },
-        { name: "Agent Audit Logs", href: "/audit-logs", icon: History },
+        { name: "Activity Log", href: "/audit-logs", icon: History },
         { name: "Team & Permissions", href: "/team", icon: ShieldCheck },
         { name: "Settings", href: "/settings", icon: Settings },
       ],
@@ -88,30 +90,30 @@ export function Sidebar() {
   ];
 
   return (
-    <aside className="w-64 bg-surface border-r border-slateSurface-200 flex flex-col shrink-0 select-none">
+    <aside className="w-64 bg-surface border-r border-border flex flex-col shrink-0 select-none">
       {/* Brand Header */}
-      <div className="h-16 px-6 border-b border-slateSurface-100 flex items-center gap-3">
-        <div className="w-9 h-9 rounded-xl bg-forest flex items-center justify-center text-lime-accent font-black text-lg shadow-sm">
+      <div className="h-14 px-5 border-b border-border flex items-center gap-3">
+        <div className="w-8 h-8 rounded-lg bg-forest flex items-center justify-center text-lime-accent font-black text-base shadow-xs shrink-0">
           Ø
         </div>
         <div>
-          <div className="font-bold text-base tracking-tight text-forest flex items-center gap-1.5">
+          <div className="font-bold text-sm tracking-tight text-foreground">
             LEDGER ZERO
           </div>
-          <div className="text-[10px] uppercase font-semibold tracking-wider text-brand-700/60">
-            by NULL PROTOCOL
+          <div className="text-[10px] font-medium text-text-dim">
+            Financial Operating System
           </div>
         </div>
       </div>
 
       {/* Navigation Groups */}
-      <div className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
+      <div className="flex-1 overflow-y-auto px-3 py-4 space-y-5">
         {navigationGroups.map((group) => (
           <div key={group.label}>
-            <div className="px-3 mb-2 text-[10px] font-bold uppercase tracking-wider text-brand-700/50">
+            <div className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-text-dim/80">
               {group.label}
             </div>
-            <nav className="space-y-1">
+            <nav className="space-y-0.5">
               {group.items.map((item) => {
                 const isActive =
                   item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
@@ -122,32 +124,28 @@ export function Sidebar() {
                     key={item.name}
                     href={item.href}
                     className={cn(
-                      "flex items-center justify-between px-3 py-2 text-sm font-medium rounded-lg transition-colors group relative",
+                      "flex items-center justify-between px-3 py-2 text-xs font-medium rounded-lg transition-colors group",
                       isActive
-                        ? "bg-brand-50 text-forest font-semibold"
-                        : "text-brand-800/80 hover:bg-slateSurface-100 hover:text-brand-900"
+                        ? "bg-forest-action/10 text-forest-action font-semibold dark:bg-forest-action/20"
+                        : "text-foreground/80 hover:bg-surface-subtle hover:text-foreground"
                     )}
                   >
                     <div className="flex items-center gap-2.5">
                       <Icon
                         className={cn(
-                          "w-4 h-4 transition-colors",
+                          "w-4 h-4 shrink-0 transition-colors",
                           isActive
                             ? "text-forest-action"
-                            : "text-brand-700/60 group-hover:text-brand-900"
+                            : "text-text-dim group-hover:text-foreground"
                         )}
                       />
-                      <span>{item.name}</span>
+                      <span className="truncate">{item.name}</span>
                     </div>
 
                     {item.badge !== undefined && item.badge > 0 && (
-                      <span className="px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-amber-500 text-white animate-pulse">
+                      <span className="px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-amber-500 text-white min-w-[18px] text-center">
                         {item.badge}
                       </span>
-                    )}
-
-                    {isActive && (
-                      <span className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-forest-action rounded-r-md" />
                     )}
                   </Link>
                 );
@@ -157,14 +155,19 @@ export function Sidebar() {
         ))}
       </div>
 
-      {/* Bottom Product Principle footer */}
-      <div className="p-3 border-t border-slateSurface-100 bg-slateSurface-50/50">
-        <div className="text-[10px] font-bold text-forest tracking-wide uppercase mb-1">
-          Observe → Plan → Verify
+      {/* Clean Live Status Footer */}
+      <div className="p-3 border-t border-border">
+        <div className="flex items-center gap-2.5 px-2.5 py-2 rounded-xl bg-surface-subtle border border-border/60">
+          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+          <div className="min-w-0 flex-1">
+            <div className="text-xs font-semibold text-foreground truncate">
+              {business?.name || "Production Ledger"}
+            </div>
+            <div className="text-[10px] text-text-dim truncate">
+              Live & Synchronized
+            </div>
+          </div>
         </div>
-        <p className="text-[11px] text-brand-700/70 leading-relaxed">
-          Autonomous financial decisions require explicit human authorization.
-        </p>
       </div>
     </aside>
   );

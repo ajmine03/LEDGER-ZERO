@@ -61,6 +61,15 @@ function AIWorkspaceContent() {
     },
   ];
 
+  const [hasApiKey, setHasApiKey] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const key = localStorage.getItem("ledger_ai_api_key");
+      setHasApiKey(Boolean(key));
+    }
+  }, []);
+
   const handleStartGoal = useCallback(async (customPrompt?: string) => {
     const goalText = customPrompt || prompt;
     if (!goalText.trim() || isRunning) return;
@@ -83,7 +92,39 @@ function AIWorkspaceContent() {
           });
         }
       });
-      setCurrentRun(run);
+
+      // If an AI API Key is configured in /admin, query the live AI model
+      if (typeof window !== "undefined") {
+        const apiKey = localStorage.getItem("ledger_ai_api_key") || "";
+        const provider = localStorage.getItem("ledger_ai_provider") || "openai";
+        const model = localStorage.getItem("ledger_ai_model") || "gpt-4o-mini";
+
+        if (apiKey) {
+          try {
+            const aiRes = await fetch("/api/ai/agent", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                prompt: goalText,
+                apiKey,
+                provider,
+                model,
+                businessContext: { cash: 20000, payablesDue7Days: 45000, gap: -25000 },
+              }),
+            });
+            if (aiRes.ok) {
+              const aiData = await aiRes.json();
+              if (aiData.answer) {
+                run.summary = aiData.answer;
+              }
+            }
+          } catch (e) {
+            console.error("Cloud AI call:", e);
+          }
+        }
+      }
+
+      setCurrentRun({ ...run });
 
       if (run.proposedTaskIds.length > 0) {
         const task = await actionService.getActionTaskById(run.proposedTaskIds[0]);
@@ -235,8 +276,8 @@ function AIWorkspaceContent() {
                   </Badge>
                 )}
               </div>
-              <Badge variant="outline" size="sm">
-                Deterministic Engine
+              <Badge variant={hasApiKey ? "lime" : "outline"} size="sm">
+                {hasApiKey ? "Cloud AI Active" : "Autonomous Co-Pilot"}
               </Badge>
             </CardHeader>
 
